@@ -5,12 +5,14 @@
         <title>Apacana</title>
         <link rel="stylesheet" href="./style/map.css">
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" />
-        <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"></script>
-        <script src="./scripts/map_provider.js"></script>
     </head>
 
     <body>
         <div id="map"></div>
-        <script src="./scripts/map.js"></script>
+        <div class="spin">
+            <p>稍等片刻，旅程开启</p>
+            <img src="./assets/arrow.png" alt="arrow">
+        </div>
+        <script data-main="scripts/index" src="./scripts/lib/require.js"></script>
     </body>
 </html>

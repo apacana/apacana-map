@@ -2,6 +2,14 @@
     height: 100vh;
 }
 
+.spin {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    justify-content: center
+}
+
 /* ======== Reset ======== */
 html, body, div, span, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
