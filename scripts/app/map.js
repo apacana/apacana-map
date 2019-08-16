@@ -19,7 +19,7 @@ let getMap = function(id) {
     }).addTo(map);
 
     return map;
-}
+};
 
 define(function (require) {
     require("leaflet-provider");

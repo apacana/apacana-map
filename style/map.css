@@ -17,6 +17,54 @@
     margin-top: 10px;
 }
 
+.leaflet-control-mapbox-geocoder {
+    background-color: rgb(250, 251, 252);
+    border: none !important;
+    box-shadow: rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.31) 0px 0px 1px !important;
+}
+
+.leaflet-control-mapbox-geocoder-toggle {
+    -webkit-mask: url(../assets/search-eye-line.svg) no-repeat 50% 50%;
+    mask: url(../assets/search-eye-line.svg) no-repeat 50% 50%;
+    -webkit-mask-size: cover;
+    mask-size: cover;
+    background-color: #000 !important;
+    border: none !important;
+    left: 4px;
+    position: absolute;
+    top: 3px;
+}
+
+.leaflet-control-mapbox-geocoder-wrap {
+    margin-left: 36px;
+}
+
+.leaflet-control-mapbox-geocoder-form {
+    background-color: rgb(250, 251, 252);
+    border-color: rgb(223, 225, 230);
+    border-radius: 3px;
+    padding: 6px;
+}
+
+.leaflet-control-mapbox-geocoder-form input {
+    border: none;
+}
+
+.leaflet-control-mapbox-geocoder-results {
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px; 
+    box-shadow: rgba(9, 30, 66, 0.25) 0px 4px 8px -2px, rgba(9, 30, 66, 0.31) 0px 0px 1px !important;
+    overflow: hidden;
+    position: absolute;
+    top: 34px;
+    width: 100%;
+}
+
+.leaflet-control-mapbox-geocoder-results a {
+    border-radius: 0 !important;
+    width: 100% !important;
+}
+
 /* ======== State ======= */
 .is-none {
     display: none;
