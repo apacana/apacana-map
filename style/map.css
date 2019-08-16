@@ -28,11 +28,18 @@
     mask: url(../assets/search-eye-line.svg) no-repeat 50% 50%;
     -webkit-mask-size: cover;
     mask-size: cover;
-    background-color: #000 !important;
+    background-color: #bec8d2 !important;
     border: none !important;
-    left: 4px;
+    cursor: default;
+    left: 10px;
+    height: 20px !important;
     position: absolute;
-    top: 3px;
+    top: 7px;
+    width: 20px !important;
+}
+
+.leaflet-control-mapbox-geocoder-toggle.is-active {
+    background-color: #006aff !important;
 }
 
 .leaflet-control-mapbox-geocoder-wrap {
@@ -62,6 +69,11 @@
 
 .leaflet-control-mapbox-geocoder-results a {
     border-radius: 0 !important;
+    box-sizing: border-box;
+    overflow: hidden;
+    padding: 0 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     width: 100% !important;
 }
 
