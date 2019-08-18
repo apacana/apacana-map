@@ -42,7 +42,8 @@
     width: 20px !important;
 }
 
-.leaflet-control-mapbox-geocoder .leaflet-control-mapbox-geocoder-toggle.is-active {
+.leaflet-control-mapbox-geocoder .leaflet-control-mapbox-geocoder-toggle.is-active,
+.leaflet-control-mapbox-geocoder .leaflet-control-mapbox-geocoder-toggle:hover {
     background-color: #006aff;
 }
 
@@ -85,29 +86,29 @@
 /* ======== Animation ======== */
 @keyframes search-bg {
     0%  {
-        background-color: #bec8d2;
-    }
-
-    50% { 
         background-color: #006aff;
     }
 
-    100% {
+    50% { 
         background-color: #bec8d2;
+    }
+
+    100% {
+        background-color: #006aff;
     }
 }
 
 @-webkit-keyframes search-bg {
     0%  {
-        background-color: #bec8d2;
-    }
-
-    50% { 
         background-color: #006aff;
     }
 
-    100% {
+    50% { 
         background-color: #bec8d2;
+    }
+
+    100% {
+        background-color: #006aff;
     }
 }
 
