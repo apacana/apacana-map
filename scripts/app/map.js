@@ -3,11 +3,12 @@ let getMap = function(id) {
         center: [39.904983,116.427287],
         zoom: 13,
         zoomControl: false
-    }).setMaxBounds([[-90, 0], [90, 360]]);
+    }).setMaxBounds([[-90, -180], [90, 180]]);
 
     // 显示谷歌地图
     L.tileLayer.mapProvider("Google.Normal.Map", {
         maxZoom: 18,
+        minZoom: 3,
         attribution: 'Imagery © <a href="https://www.google.cn/maps">Google Map</a>'
     }).addTo(map);
 

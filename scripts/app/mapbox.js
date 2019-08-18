@@ -1,4 +1,7 @@
-let addGeoContorl = function (mapBox) {
+let addGeoControl = function (mapBox, injects) {
+    // 侵入 GeocoderControl 使其更符合要求
+    injects.geoControl();
+
     return function (map) {
         let control = mapBox.geocoderControl("mapbox.places", {
             keepOpen: true
@@ -23,14 +26,14 @@ let addGeoContorl = function (mapBox) {
 };
 
 define(function (require) {
+    // 加载 mapbox 的 token 
     let tokens = require("./token");
-    require("mapbox");
-
-    // 加载 mapbox 的 token
     L.mapbox.accessToken = tokens.mapbox;
 
+    // 加载关于 mapbox 的侵入
+    let mapboxInjects = require("./mapbox-inject/index");
+
     return { 
-        mapbox: L.mapbox, 
-        addGeoContorl: addGeoContorl(L.mapbox)
+        addGeoControl: addGeoControl(L.mapbox, mapboxInjects)
     };
 });

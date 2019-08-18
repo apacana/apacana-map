@@ -4,5 +4,5 @@ define(function (require) {
 
     let map = mapFns.getMap("map");  
 
-    mapBoxFns.addGeoContorl(map);
+    mapBoxFns.addGeoControl(map);
 });

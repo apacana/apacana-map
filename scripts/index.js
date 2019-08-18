@@ -6,7 +6,7 @@ requirejs.config({
 });
 
 // 加载地图函数之后再加载主函数
-requirejs(["leaflet"], function() {
+requirejs(["leaflet-mapbox"], function() {
     // @TODO 以后可以加一点动画特效
     document.querySelector(".spin").classList.add("is-none");
     requirejs(["app/main"]);
