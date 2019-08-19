@@ -1,6 +1,7 @@
 let injectGeoControl = function (require) {
-    return function () {
+    return function (fnc) {
         require(["./geoControl"], function () {
+            fnc();
         });
     };
 };
