@@ -13,13 +13,8 @@ let gblen = function(str) {
 
 // 函数防抖
 let debounce = function (fnc, delay) {
-    return function(e) {
+    return function() {
         clearTimeout(this.states.search);
-
-        // 如果是回车键，直接返回
-        if (e.keyCode == 13) {
-            return;
-        }
 
         let context = this;
         this.states.query = this._input.value;
@@ -163,7 +158,7 @@ let onAdd = function (map) {
     input.setAttribute('placeholder', 'Search');
 
     L.DomEvent.on(form, 'submit', this._geocode, this);
-    L.DomEvent.on(input, 'keyup', debounce(this._autocomplete, 500), this);
+    L.DomEvent.on(input, 'input', debounce(this._autocomplete, 500), this);
     L.DomEvent.disableClickPropagation(container);
 
     // 输入框状态可以由 icon 表现
