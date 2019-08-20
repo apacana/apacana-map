@@ -1,17 +1,24 @@
 let makeUserPrepareRequest = function() {
-    console.log("userPrepare start");
     fetch(requestConfig.domain + requestConfig.userPrepare, {
+        credentials: 'include',
         method: 'GET',
-    }).then(response => console.log(response.json()));
-    console.log("userPrepare end");
+    }).catch(function(e) {
+        console.log("makeUserPrepareRequest error");
+    });
 };
 
 let makeGetUserInfoRequest = function() {
-    console.log("getUserInfo start");
     fetch(requestConfig.domain + requestConfig.getUserInfo, {
+        credentials: 'include',
         method: 'GET',
-    }).then(response => console.log(response.json()));
-    console.log("getUserInfo end");
+    }).then(response => {
+        return response.json();
+    }).then(data => {
+        console.log(data)
+        // todo: 数据存储
+    }).catch(function(e) {
+        console.log("makeGetUserInfoRequest error");
+    });
 };
 
 define(function (require) {
