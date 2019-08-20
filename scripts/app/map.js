@@ -1,6 +1,6 @@
 let getMap = function(id) {    
     let map = L.map(id, {
-        center: [39.904983,116.427287],
+        center: [39.908898,116.394293],
         zoom: 13,
         zoomControl: false
     }).setMaxBounds([[-90, -180], [90, 180]]);
@@ -20,7 +20,7 @@ let getMap = function(id) {
     }).addTo(map);
 
     return map;
-};
+}
 
 define(function (require) {
     require("leaflet-provider");

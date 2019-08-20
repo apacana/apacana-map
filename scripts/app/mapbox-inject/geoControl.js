@@ -12,14 +12,24 @@ let gblen = function(str) {
 }
 
 // 函数防抖
-let debounce = function (fnc, delay, search) {
-    return function() {
-        clearTimeout(search);
+let debounce = function (fnc, delay) {
+    return function(e) {
+        clearTimeout(this.states.search);
+
+        // 如果是回车键，直接返回
+        if (e.keyCode == 13) {
+            return;
+        }
 
         let context = this;
-        search = setTimeout(function () {
+        this.states.query = this._input.value;
+        this.states.isSearch = false;
+
+        this.states.search = setTimeout(function () {
             fnc.apply(context);
         }, delay);
+
+        console.log(this._input.value);
     };
 };
 
@@ -28,7 +38,6 @@ let debounce = function (fnc, delay, search) {
 // 2. 能够触发搜索中状态
 let autocomplete = function () {
     let val = this._input.value;
-
     if (gblen(val) < 4) return this._updateAutocomplete(false)();
 
     L.DomUtil.addClass(this._container, 'searching');
@@ -47,8 +56,8 @@ let updateAutocomplete = function (jump) {
     return function (err, resp) {
         L.DomUtil.removeClass(that._container, 'searching');
 
-        that.states.search = null;
         that._results.innerHTML = '';
+        that.options.isSearch = true;
         
         if (err || !resp) {
             that.fire('error', {error: err});
@@ -71,8 +80,7 @@ let updateAutocomplete = function (jump) {
             }
             that.states.results = features;
             that._displayResults(features);
-
-       }
+        }
     }
 }
 
@@ -83,10 +91,10 @@ let updateAutocomplete = function (jump) {
 let geocode = function (e) {
     L.DomEvent.preventDefault(e);
     // 说明是最新的数据可以直接使用
-    if (this.states.search == null) {
+    if (this.states.isSearch) {
         // 与搜索一样，发送没有数据的事件，交由外层处理
-        if (this.states.results == 0) {
-            that.fire('notfound');
+        if (this.states.results.length == 0) {
+            this.fire('notfound');
         } else {
             this._chooseResult(this.states.results[0]);
             this.fire('select', { feature: this.states.results[0] });
@@ -96,7 +104,7 @@ let geocode = function (e) {
 
         L.DomUtil.addClass(this._container, 'searching');
         this.geocoder.query(L.Util.extend({
-            query: val,
+            query: this.states.query,
             proximity: this.options.proximity ? this._map.getCenter() : false
         }, this.options.queryOptions), this._updateAutocomplete(true));
     }
@@ -106,7 +114,7 @@ let geocode = function (e) {
 // 1. keyup 事件改为函数防抖下的自动搜索
 // 2. submit 事件改为特殊的选中第一个
 // 3. 输入框状态可以由 icon 表现
-let onAdd = function (map) {
+let onAdd = function (map) { 
     var container = L.DomUtil.create('div', 'leaflet-control-mapbox-geocoder leaflet-bar leaflet-control'),
         link = L.DomUtil.create('a', 'leaflet-control-mapbox-geocoder-icon mapbox-icon mapbox-icon-geocoder', container),
         results = L.DomUtil.create('div', 'leaflet-control-mapbox-geocoder-results', container),
@@ -121,7 +129,7 @@ let onAdd = function (map) {
     input.setAttribute('placeholder', 'Search');
 
     L.DomEvent.on(form, 'submit', this._geocode, this);
-    L.DomEvent.on(input, 'keyup', debounce(this._autocomplete, 500, this.states.search), this);
+    L.DomEvent.on(input, 'keyup', debounce(this._autocomplete, 500), this);
     L.DomEvent.disableClickPropagation(container);
 
     // 输入框状态可以由 icon 表现
@@ -143,7 +151,7 @@ let onAdd = function (map) {
 define(function () {
     let geoControl = L.mapbox.GeocoderControl.prototype; 
 
-    geoControl.states = { search: null, results: [] };
+    geoControl.states = { search: null, results: [], isSearch: false, query: "" };
 
     // 侵入各个函数使得更加符合要求
     geoControl._autocomplete = autocomplete;
