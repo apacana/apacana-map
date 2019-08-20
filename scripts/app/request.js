@@ -1,6 +1,6 @@
 define(function () {
     return {
-        domain: "http://localhost:8899",
+        domain: "http://120.78.145.184",
         userPrepare: "/api/user/prepare/",
         getUserInfo: "/api/user/info/"
     };
