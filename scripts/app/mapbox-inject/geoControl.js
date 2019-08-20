@@ -28,8 +28,6 @@ let debounce = function (fnc, delay) {
         this.states.search = setTimeout(function () {
             fnc.apply(context);
         }, delay);
-
-        console.log(this._input.value);
     };
 };
 
@@ -67,19 +65,55 @@ let updateAutocomplete = function (jump) {
                 features = resp.results.features;
             }
             if (features.length) {
-                that.fire('found', {results: resp.results});
+                let cods = features.reduce(function (ans, item) {
+                    if (item.bbox) {
+                        ans += (item.bbox[0] + "," + item.bbox[1] 
+                            + "|" + item.bbox[2] + "," + item.bbox[3] + "|");
+                    } else {
+                        ans += "0,0|0,0|";
+                    }
 
-                // 如果需要跳转，自动跳转第一个
-                // 用于回车触发的 submit 事件中
-                if (jump) {
-                    that._chooseResult(features[0]);
-                    that.fire('select', { feature: features[0] });
-                }
+                    ans += (item.center[0] + "," + item.center[1] + "|");
+
+                    return ans;
+                }, "");
+
+                fetch(`https://restapi.amap.com/v3/assistant/coordinate/convert?locations=${cods}&coordsys=gps&key=${tokens.gaode}`, {
+                    method: "GET"
+                }).then(response => {
+                    return response.json();
+                }).then(({ locations }) => {
+                    let locs = locations.split(";");
+                    for(let i = 0; i < locs.length; i += 3) {
+                        let center = locs[i + 2].split(",");
+                        features[i / 3].center[0] = Number.parseFloat(center[0]);
+                        features[i / 3].center[1] = Number.parseFloat(center[1]);
+
+                        if (locs[i] !== "0,0" || locs[i + 1] !== "0,0") {
+                            let bbox1 = locs[i].split(",");
+                            let bbox2 = locs[i + 1].split(",");
+                            features[i / 3].bbox = [Number.parseFloat(bbox1[0]), Number.parseFloat(bbox1[1]),
+                                Number.parseFloat(bbox2[0]), Number.parseFloat(bbox2[1])];
+                        }
+                    }
+                    
+                    that.fire('found', {results: resp.results});
+                    // 如果需要跳转，自动跳转第一个
+                    // 用于回车触发的 submit 事件中
+                    if (jump) {
+                        that._chooseResult(features[0]);
+                        that.fire('select', { feature: features[0] });
+                    }
+
+                    that._displayResults(features);
+                    that.states.results = features;
+                }).catch(e => {
+                    console.log(e);
+                });
             } else {
                 that.fire('notfound');
+                that.states.results = [];
             }
-            that.states.results = features;
-            that._displayResults(features);
         }
     }
 }
@@ -148,7 +182,8 @@ let onAdd = function (map) {
     return container;
 };
 
-define(function () {
+define(function (require) {
+    tokens = require("../token");
     let geoControl = L.mapbox.GeocoderControl.prototype; 
 
     geoControl.states = { search: null, results: [], isSearch: false, query: "" };
