@@ -1,0 +1,7 @@
+define(function () {
+    return {
+        domain: "http://localhost:8899",
+        userPrepare: "/api/user/prepare/",
+        getUserInfo: "/api/user/info/"
+    };
+});
