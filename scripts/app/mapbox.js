@@ -1,9 +1,11 @@
 let addGeoControl = function (mapBox, injects) {
     // 单例模式，利用 JS 的闭包特性，实现只有一个搜索标记移动
     let markerFlag = false;
-    let searchMarker = L.marker([-360, -360], {
-        icon: addIcon(mapBox)
-    }); 
+    let otherMarkers = [0,0,0,0,0].map(() => {
+        return L.marker([-360, -360], {
+            icon: addIcon(mapBox)
+        })
+    });
 
     return function (map) {
         // 侵入 GeocoderControl 使其更符合要求
@@ -11,22 +13,23 @@ let addGeoControl = function (mapBox, injects) {
             let control = mapBox.geocoderControl("mapbox.places", {
                 keepOpen: true,
             });
-
             if (!markerFlag) {
                 // 点击标记会使其移动到中心
-                searchMarker.on("click", function (e) {
-                    map.panTo(e.target.getLatLng());
+                otherMarkers.forEach(item => {
+                    item.on("click", function (e) {
+                        map.panTo(e.target.getLatLng());
+                    }).addTo(map);
                 });
 
-                // 添加到地图上
-                searchMarker.addTo(map);
                 markerFlag = true;
             }
 
-            control.on("select", function ({ feature }) {
-                // 只需移动搜索标记即可
-                let [lon, lat] = feature.center
-                searchMarker.setLatLng([lat, lon]);
+            control.on("show", function ({ features }) {
+                features.forEach((item, index) => {
+                    // 只需移动搜索标记即可
+                    let [lon, lat] = item.center;
+                    otherMarkers[index].setLatLng([lat, lon]);
+                });
             });
 
             map.addControl(control); 

@@ -50,7 +50,7 @@ let updateAutocomplete = function (jump) {
         L.DomUtil.removeClass(that._container, 'searching');
 
         that._results.innerHTML = '';
-        that.options.isSearch = true;
+        that.states.isSearch = true;
         
         if (err || !resp) {
             that.fire('error', {error: err});
@@ -93,11 +93,12 @@ let updateAutocomplete = function (jump) {
                     }
                     
                     that.fire('found', {results: resp.results});
+                    that.fire('show', { features: features });
+
                     // 如果需要跳转，自动跳转第一个
                     // 用于回车触发的 submit 事件中
                     if (jump) {
                         that._chooseResult(features[0]);
-                        that.fire('select', { feature: features[0] });
                     }
 
                     that._displayResults(features);
@@ -126,7 +127,6 @@ let geocode = function (e) {
             this.fire('notfound');
         } else {
             this._chooseResult(this.states.results[0]);
-            this.fire('select', { feature: this.states.results[0] });
         }
     } else {
         clearTimeout(this.states.search);
@@ -140,7 +140,7 @@ let geocode = function (e) {
 }
 
 // 侵入后：
-// 1. keyup 事件改为函数防抖下的自动搜索
+// 1. input 事件改为函数防抖下的自动搜索
 // 2. submit 事件改为特殊的选中第一个
 // 3. 输入框状态可以由 icon 表现
 let onAdd = function (map) { 
