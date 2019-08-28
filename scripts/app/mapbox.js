@@ -48,6 +48,11 @@ let addGeoControl = function (mapBox, injects) {
                 });
             });
 
+            control.on("select", function ({ index }) {
+                console.log(index);
+                otherMarkers[index].openPopup();
+            });
+
             map.addControl(control); 
        })
     };

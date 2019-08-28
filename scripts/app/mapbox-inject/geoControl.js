@@ -42,7 +42,8 @@ let autocomplete = function () {
 
 // 侵入后：
 // 1. 能够取消搜索中状态
-// 2. @TODO 更明显的搜索无结果显示(应由外层处理，通过 notfound 传递出去)
+// 2. 会对结果进行坐标修正（针对火星坐标系）
+// 3. @TODO 更明显的搜索无结果显示(应由外层处理，通过 notfound 传递出去)
 let updateAutocomplete = function (jump) {
     let that = this;
 
@@ -97,6 +98,7 @@ let updateAutocomplete = function (jump) {
                     // 如果需要跳转，自动跳转第一个
                     // 用于回车触发的 submit 事件中
                     if (jump) {
+                        that.fire('select', { feature: features[0], index: 0 });
                         that._chooseResult(features[0]);
                     }
                     
@@ -179,6 +181,30 @@ let onAdd = function (map) {
     return container;
 };
 
+// 侵入后：
+// 1. select 事件还会发送对应的索引
+let displayResults = function (features) {
+    for (let i = 0, l = Math.min(features.length, 5); i < l; i++) {
+        var feature = features[i];
+        var name = feature.place_name;
+        if (!name.length) continue;
+
+        var r = L.DomUtil.create('a', '', this._results);
+        var text = ('innerText' in r) ? 'innerText' : 'textContent';
+        r[text] = name;
+        r.setAttribute('title', name);
+        r.href = '#';
+
+        (L.bind(function(feature) {
+            L.DomEvent.addListener(r, 'click', function(e) {
+                this._chooseResult(feature);
+                L.DomEvent.stop(e);
+                this.fire('select', { feature: feature, index: i });
+            }, this);
+        }, this))(feature, i);
+    }
+}
+
 define(function (require) {
     tokens = require("../token");
     let geoControl = L.mapbox.GeocoderControl.prototype; 
@@ -190,4 +216,5 @@ define(function (require) {
     geoControl._updateAutocomplete = updateAutocomplete;
     geoControl._geocode = geocode;
     geoControl.onAdd = onAdd;
+    geoControl._displayResults = displayResults;
 });
