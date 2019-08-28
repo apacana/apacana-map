@@ -29,6 +29,22 @@ let addGeoControl = function (mapBox, injects) {
                     // 只需移动搜索标记即可
                     let [lon, lat] = item.center;
                     otherMarkers[index].setLatLng([lat, lon]);
+                    otherMarkers[index].bindPopup(
+                        `
+                            <p class="leaflet-info-window-name">${item.text}</p>
+                            <p class="leaflet-info-window-address">${item.place_name}</p>
+                            <div class="leaflet-info-window-btns">
+                                <p class="leaflet-info-window-latlon">
+                                    <i class="leaflet-info-window-icon icon-loc"></i>
+                                    ${lat.toFixed(6)}, ${lon.toFixed(6)}
+                                </p>
+                                <a class="leaflet-info-window-btn">
+                                    <i class="leaflet-info-window-icon icon-add"></i>
+                                    添加到点集
+                                </>
+                            </div>
+                        `
+                    );
                 });
             });
 

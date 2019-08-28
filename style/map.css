@@ -83,6 +83,67 @@
     width: 100% !important;
 }
 
+.leaflet-popup-content .leaflet-info-window-name {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 21px;
+    margin: 0;
+    max-width: 287px;
+    min-height: 21px;
+    min-width: 150px;
+    overflow: hidden;
+    padding: 0 18px 8px 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.leaflet-popup-content .leaflet-info-window-address {
+    background-color:#f1f1f1;
+    line-height: 21px;
+    font-size: 13px;
+    margin-bottom: 4px;
+    margin-top: 4px;
+    padding: 12px;
+}
+
+.leaflet-popup-content .leaflet-info-window-btns {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 16px;
+}
+
+.leaflet-popup-content .leaflet-info-window-latlon {
+    color: #333;
+    font-size: 11px;
+    font-weight: 500;
+    margin: 0;
+    margin-right: 6px;
+}
+
+.leaflet-popup-content .leaflet-info-window-icon {
+    background-color:#333;
+    display: inline-block;
+    height: 9px;
+    -webkit-mask-size: cover;
+    mask-size: cover;
+    width: 9px;
+}
+
+.leaflet-info-window-icon.icon-loc {
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' d='M0 0h24v24H0z'/%3E%3Cpath d='M17.657 15.657L12 21.314l-5.657-5.657a8 8 0 1 1 11.314 0zM5 22h14v2H5v-2z'/%3E%3C/svg%3E");
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' d='M0 0h24v24H0z'/%3E%3Cpath d='M17.657 15.657L12 21.314l-5.657-5.657a8 8 0 1 1 11.314 0zM5 22h14v2H5v-2z'/%3E%3C/svg%3E");
+}
+
+.leaflet-info-window-icon.icon-add {
+    background-color:rgb(0, 82, 204);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' d='M0 0h24v24H0z'/%3E%3Cpath d='M2 18h10v2H2v-2zm0-7h20v2H2v-2zm0-7h20v2H2V4zm16 14v-3h2v3h3v2h-3v3h-2v-3h-3v-2h3z'/%3E%3C/svg%3E");
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' d='M0 0h24v24H0z'/%3E%3Cpath d='M2 18h10v2H2v-2zm0-7h20v2H2v-2zm0-7h20v2H2V4zm16 14v-3h2v3h3v2h-3v3h-2v-3h-3v-2h3z'/%3E%3C/svg%3E");
+}
+
+.leaflet-popup-content .leaflet-info-window-btn {
+    color: rgb(0, 82, 204);
+}
+
 /* ======== Animation ======== */
 @keyframes search-bg {
     0%  {
