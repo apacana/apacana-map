@@ -49,9 +49,6 @@ let updateAutocomplete = function (jump) {
     return function (err, resp) {
         L.DomUtil.removeClass(that._container, 'searching');
 
-        that._results.innerHTML = '';
-        that.states.isSearch = true;
-        
         if (err || !resp) {
             that.fire('error', {error: err});
         } else {
@@ -100,11 +97,14 @@ let updateAutocomplete = function (jump) {
                     if (jump) {
                         that._chooseResult(features[0]);
                     }
+                    
+                    that._results.innerHTML = '';
+                    that.states.isSearch = true;
 
                     that._displayResults(features);
                     that.states.results = features;
                 }).catch(e => {
-                    console.log(e);
+                    that.fire('error', {error: e});
                 });
             } else {
                 that.fire('notfound');
