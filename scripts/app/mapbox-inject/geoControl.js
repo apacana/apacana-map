@@ -49,6 +49,8 @@ let updateAutocomplete = function (jump) {
     return function (err, resp) {
         L.DomUtil.removeClass(that._container, 'searching');
 
+        that._results.innerHTML = '';
+        
         if (err || !resp) {
             that.fire('error', {error: err});
         } else {
