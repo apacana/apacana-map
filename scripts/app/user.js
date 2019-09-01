@@ -2,6 +2,10 @@ let makeUserPrepareRequest = function() {
     fetch(requestConfig.domain + requestConfig.userPrepare, {
         credentials: 'include',
         method: 'GET',
+    }).then(function (res) {
+        if (res.ok) {
+            return makeGetUserInfoRequest();
+        }
     }).catch(function(e) {
         console.log("makeUserPrepareRequest error");
     });
@@ -25,7 +29,6 @@ define(function (require) {
     requestConfig = require("./request");
 
     makeUserPrepareRequest();
-    makeGetUserInfoRequest();
     return {
     };
 });

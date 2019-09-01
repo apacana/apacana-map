@@ -38,7 +38,7 @@ let addGeoControl = function (mapBox, injects) {
                                     <i class="leaflet-info-window-icon icon-loc"></i>
                                     ${lat.toFixed(6)}, ${lon.toFixed(6)}
                                 </p>
-                                <a class="leaflet-info-window-btn">
+                                <a class="leaflet-info-window-btn" onclick="addPoint('${item.id}', '${item.escp_text}', '${item.escp_place_name}', '${item.center}');">
                                     <i class="leaflet-info-window-icon icon-add"></i>
                                     添加到点集
                                 </>
@@ -66,7 +66,29 @@ let addIcon = function (mapBox, symbol = "circle", size = "medium", color = "#00
     });
 };
 
+let addPoint = function(point_id, text, place_name, center, point_type = 'search_point') {
+    text = unescape(text);
+    place_name = unescape(place_name);
+    fetch(requestConfig.domain + requestConfig.addPoint, {
+        credentials: 'include',
+        method: 'POST',
+        body: '{"point_id": "' + point_id + '",' +
+            '"point_type": "' + point_type + '",' +
+            '"text": "' + text + '",' +
+            '"place_name": "' + place_name + '",' +
+            '"center": "' + center + '"}',
+    }).then(response => {
+        return response.json();
+    }).then(data => {
+        console.log(data)
+        // todo: 数据存储展示
+    }).catch(function(e) {
+        console.log("addPoint error");
+    });
+};
+
 define(function (require) {
+    requestConfig = require("./request");
     // 加载 mapbox 的 token 
     let tokens = require("./token");
     L.mapbox.accessToken = tokens.mapbox;
