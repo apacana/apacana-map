@@ -43,7 +43,8 @@ let autocomplete = function () {
 // 侵入后：
 // 1. 能够取消搜索中状态
 // 2. 会对结果进行坐标修正（针对火星坐标系）
-// 3. @TODO 更明显的搜索无结果显示(应由外层处理，通过 notfound 传递出去)
+// 3. 对搜索结果文本部分进行转码
+// 4. @TODO 更明显的搜索无结果显示(应由外层处理，通过 notfound 传递出去)
 let updateAutocomplete = function (jump) {
     let that = this;
 
@@ -60,6 +61,10 @@ let updateAutocomplete = function (jump) {
                 features = resp.results.features;
             }
             if (features.length) {
+                for(let v of features) {
+                    v.escp_text = escape(v.text);
+                    v.escp_place_name = escape(v.place_name);
+                }
                 let cods = features.reduce(function (ans, item) {
                     if (item.bbox) {
                         ans += (item.bbox[0] + "," + item.bbox[1] 
