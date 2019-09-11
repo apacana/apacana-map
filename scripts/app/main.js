@@ -1,9 +1,10 @@
 define(function (require) {
     let mapFns = require("./map");
     let mapBoxFns = require("./mapbox");
-    let userFns = require("./user");
 
-    let map = mapFns.getMap("map");  
+    map = mapFns.getMap("map");
+
+    let userFns = require("./user");
 
     mapBoxFns.addGeoControl(map);
 });

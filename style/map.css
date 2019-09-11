@@ -250,7 +250,7 @@ time, mark, audio, video {
     text-overflow: ellipsis;
     max-width: 254px;
     width: auto;
-    cursor: pointer;
+    cursor: default;
     color: #444444;
     font-weight: 400;
     vertical-align: top;

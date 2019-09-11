@@ -1,3 +1,7 @@
+pointPopupList = [];
+markerFlag = false;
+userMarkers = [];
+
 let addGeoControl = function (mapBox, injects) {
     // 单例模式，利用 JS 的闭包特性，实现只有一个搜索标记移动
     let markerFlag = false;
@@ -28,6 +32,7 @@ let addGeoControl = function (mapBox, injects) {
                 features.forEach((item, index) => {
                     // 只需移动搜索标记即可
                     let [lon, lat] = item.center;
+                    console.log([lon, lat]);
                     otherMarkers[index].setLatLng([lat, lon]);
                     otherMarkers[index].bindPopup(
                         `
@@ -85,6 +90,35 @@ let addPoint = function(point_id, text, place_name, center, point_type = 'search
     }).catch(function(e) {
         console.log("addPoint error");
     });
+};
+
+setUserMarket = function (pointList) {
+    userMarkers = [];
+    for(let point of pointList) {
+        let marker = L.marker([-360, -360], {icon: addIcon(L.mapbox)});
+        marker.addTo(map);
+        let [lon, lat] = point["center"].split(",");
+        marker.setLatLng([lat, lon]);
+        lat = parseFloat(lat);
+        lon = parseFloat(lon);
+        marker.bindPopup(
+            `
+                <p class="leaflet-info-window-name">${point["text"]}</p>
+                <p class="leaflet-info-window-address">${point["place_name"]}</p>
+                <div class="leaflet-info-window-btns">
+                    <p class="leaflet-info-window-latlon">
+                        <i class="leaflet-info-window-icon icon-loc"></i>
+                        ${lat.toFixed(6)}, ${lon.toFixed(6)}
+                    </p>
+                    <a class="leaflet-info-window-btn">
+                        <i class="leaflet-info-window-icon icon-add"></i>
+                        已添加该点
+                    </>
+                </div>
+                `
+        );
+        userMarkers.push(marker);
+    }
 };
 
 define(function (require) {
