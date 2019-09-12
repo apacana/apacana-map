@@ -47,6 +47,10 @@ let addGeoControl = function (mapBox, injects) {
                     // 只需移动搜索标记即可
                     let [lon, lat] = item.center;
                     searchMarkets[index].setLatLng([lat, lon]);
+                    searchMarkets[index]["options"]["text"] = item.text;
+                    searchMarkets[index]["options"]["place_name"] = item.place_name;
+                    searchMarkets[index]["options"]["lat"] = lat;
+                    searchMarkets[index]["options"]["lon"] = lon;
                     searchMarkets[index].bindPopup(
                         `
                             <p class="leaflet-info-window-name">${item.text}</p>
@@ -88,7 +92,6 @@ let addIcon = function (mapBox, symbol = "circle", size = "medium", color = "#00
 };
 
 let addPoint = function(index, point_id, text, place_name, center, point_type = 'search_point') {
-    console.log(index, searchMarkets[index]);
     text = unescape(text);
     place_name = unescape(place_name);
     fetch(requestConfig.domain + requestConfig.addPoint, {
@@ -107,30 +110,47 @@ let addPoint = function(index, point_id, text, place_name, center, point_type = 
             console.log("addPoint failed, code:", data.code);
         } else {
             searchMarketToUserMarket(index);
+            // change feature list
+            console.log("userInfoMem[\"strokes_info\"]:",userInfoMem["strokes_info"]);
+            if (typeof(userInfoMem["strokes_info"]) == "undefined") {
+                userInfoMem.strokes_info = {};
+                userInfoMem.strokes_info.default_stroke = createStrokeVar(data.data["stroke_info"]["stroke_name"], data.data["stroke_info"]["stroke_token"], data.data["stroke_info"]["update_time"]);
+            } else {
+                userInfoMem.strokes_info.default_stroke.update_time = data.data["stroke_info"]["update_time"];
+            }
+            userInfoMem.strokes_info.default_stroke.point_list.push(packPointInfo(text, place_name, point_id, point_type, data.data["point_info"]["point_name"], center));
+            // @todo: 不全部刷新
+            let pane = bindStrokeInfo(userInfoMem["strokes_info"]);
+            if (document.getElementById('featurelist-pane')) {
+                document.getElementById('featurelist-pane').innerHTML = pane;
+            } else {
+                console.log("getElementById featurelist-pane failed");
+            }
         }
     }).catch(function(e) {
-        console.log("addPoint error");
+        console.log("addPoint error:", e);
     });
+};
+
+let packPointInfo = function(text, place_name, point_id, point_type, point_token, center, icon_type='', icon_color='', comment='', ext='') {
+    let point = {};
+    point.text = text;
+    point.place_name = place_name;
+    point.point_id = point_id;
+    point.point_type = point_type;
+    point.point_token = point_token;
+    point.center = center;
+    point.icon_type = icon_type;
+    point.icon_color = icon_color;
+    point.comment = comment;
+    point.ext = ext;
+    return point;
 };
 
 let searchMarketToUserMarket = function(index) {
     let market = searchMarkets[index];
-    market.bindPopup(`
-                <p class="leaflet-info-window-name">${point["text"]}</p>
-                <p class="leaflet-info-window-address">${point["place_name"]}</p>
-                <div class="leaflet-info-window-btns">
-                    <p class="leaflet-info-window-latlon">
-                        <i class="leaflet-info-window-icon icon-loc"></i>
-                        ${lat.toFixed(6)}, ${lon.toFixed(6)}
-                    </p>
-                    <a class="leaflet-info-window-btn">
-                        <i class="leaflet-info-window-icon icon-add"></i>
-                        已添加该点
-                    </>
-                </div>
-                `);
-    userMarkers.push(marker);
-    console.log(userMarkers);
+    market.setPopupContent(userMarketPopup(market["options"]["text"], market["options"]["place_name"], market["options"]["lat"], market["options"]["lon"]));
+    userMarkers.push(market);
 };
 
 selectUserMarket = function(point_id, point_type) {
@@ -159,10 +179,14 @@ setUserMarket = function (pointList) {
         marker.setLatLng([lat, lon]);
         lat = parseFloat(lat);
         lon = parseFloat(lon);
-        marker.bindPopup(
-            `
-                <p class="leaflet-info-window-name">${point["text"]}</p>
-                <p class="leaflet-info-window-address">${point["place_name"]}</p>
+        marker.bindPopup(userMarketPopup(point["text"], point["place_name"], lat, lon));
+        userMarkers.push(marker);
+    }
+};
+
+userMarketPopup = function(text, place_name, lat, lon) {
+  return `<p class="leaflet-info-window-name">${text}</p>
+                <p class="leaflet-info-window-address">${place_name}</p>
                 <div class="leaflet-info-window-btns">
                     <p class="leaflet-info-window-latlon">
                         <i class="leaflet-info-window-icon icon-loc"></i>
@@ -172,15 +196,10 @@ setUserMarket = function (pointList) {
                         <i class="leaflet-info-window-icon icon-add"></i>
                         已添加该点
                     </>
-                </div>
-                `
-        );
-        userMarkers.push(marker);
-    }
+                </div>`
 };
 
 define(function (require) {
-    requestConfig = require("./request");
     // 加载 mapbox 的 token 
     let tokens = require("./token");
     L.mapbox.accessToken = tokens.mapbox;
