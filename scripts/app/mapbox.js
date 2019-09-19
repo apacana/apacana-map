@@ -1,6 +1,10 @@
 markerFlag = false;
 userMarkers = [];
 searchMarkets = null;
+popupOption = {
+    autoPanPaddingTopLeft: L.point(350, 80),
+    autoPanPaddingBottomRight: L.point(100, 100)
+};
 
 let initSearchMarket = function (mapBox) {
     searchMarkets = [0,0,0,0,0].map(() => {
@@ -13,11 +17,6 @@ let initSearchMarket = function (mapBox) {
 let addGeoControl = function (mapBox, injects) {
     // 单例模式，利用 JS 的闭包特性，实现只有一个搜索标记移动
     let markerFlag = false;
-    let otherMarkers = [0,0,0,0,0].map(() => {
-        return L.marker([-360, -360], {
-            icon: addIcon(mapBox)
-        })
-    });
 
     return function (map) {
         // 侵入 GeocoderControl 使其更符合要求
@@ -179,7 +178,7 @@ setUserMarket = function (pointList) {
         marker.setLatLng([lat, lon]);
         lat = parseFloat(lat);
         lon = parseFloat(lon);
-        marker.bindPopup(userMarketPopup(point["text"], point["place_name"], lat, lon));
+        marker.bindPopup(userMarketPopup(point["text"], point["place_name"], lat, lon), popupOption);
         userMarkers.push(marker);
     }
 };
@@ -199,6 +198,23 @@ userMarketPopup = function(text, place_name, lat, lon) {
                 </div>`
 };
 
+let mapMouseControl = function(mapBox, injects) {
+    return function (map) {
+        // 单击事件
+        map.on('click', function (e) {
+            console.log("map click", e, mapBox.GeocoderControl.prototype);
+        });
+        // 右键事件
+        map.on('contextmenu', function (e) {
+            console.log("map contextmenu");
+        });
+        // 地图拖动事件
+        map.on('dragstart', function (e) {
+            console.log("map dragstart");
+        });
+    }
+};
+
 define(function (require) {
     // 加载 mapbox 的 token 
     let tokens = require("./token");
@@ -210,6 +226,7 @@ define(function (require) {
     initSearchMarket(L.mapbox);
 
     return { 
-        addGeoControl: addGeoControl(L.mapbox, mapboxInjects)
+        addGeoControl: addGeoControl(L.mapbox, mapboxInjects),
+        mapMouseControl: mapMouseControl(L.mapbox, mapboxInjects)
     };
 });

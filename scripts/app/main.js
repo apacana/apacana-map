@@ -7,4 +7,5 @@ define(function (require) {
     let userFns = require("./user");
 
     mapBoxFns.addGeoControl(map);
+    mapBoxFns.mapMouseControl(map);
 });

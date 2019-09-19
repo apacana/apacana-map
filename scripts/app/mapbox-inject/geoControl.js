@@ -9,7 +9,7 @@ let gblen = function(str) {
         }  
     }  
     return len;  
-}
+};
 
 // 函数防抖
 let debounce = function (fnc, delay) {
@@ -30,6 +30,7 @@ let debounce = function (fnc, delay) {
 // 1. 4 字符长度以下不会触发自动搜索，且关闭搜索提示
 // 2. 能够触发搜索中状态
 let autocomplete = function () {
+    console.log("autocomplete");
     let val = this._input.value;
     if (gblen(val) < 4) return this._updateAutocomplete(false)();
 
@@ -38,7 +39,7 @@ let autocomplete = function () {
         query: val,
         proximity: this.options.proximity ? this._map.getCenter() : false
     }, this.options.queryOptions), this._updateAutocomplete(false));
-}
+};
 
 // 侵入后：
 // 1. 能够取消搜索中状态
@@ -46,6 +47,7 @@ let autocomplete = function () {
 // 3. 对搜索结果文本部分进行转码
 // 4. @TODO 更明显的搜索无结果显示(应由外层处理，通过 notfound 传递出去)
 let updateAutocomplete = function (jump) {
+    console.log("updateAutocomplete");
     let that = this;
 
     return function (err, resp) {
@@ -121,13 +123,14 @@ let updateAutocomplete = function (jump) {
             }
         }
     }
-}
+};
 
 // 侵入后：
 // 1. 如果已有最新数据，将会自动跳转到第一个位置
 // 2. 若最新数据长度为 0 ，发送 notfound 事件
 // 3. 若没有最新数据，撤销正在等待的搜索，立即发送搜索，并跳转第一个位置
 let geocode = function (e) {
+    console.log("geocode");
     L.DomEvent.preventDefault(e);
     // 说明是最新的数据可以直接使用
     if (this.states.isSearch) {
@@ -146,13 +149,14 @@ let geocode = function (e) {
             proximity: this.options.proximity ? this._map.getCenter() : false
         }, this.options.queryOptions), this._updateAutocomplete(true));
     }
-}
+};
 
 // 侵入后：
 // 1. input 事件改为函数防抖下的自动搜索
 // 2. submit 事件改为特殊的选中第一个
 // 3. 输入框状态可以由 icon 表现
-let onAdd = function (map) { 
+let onAdd = function (map) {
+    console.log("onAdd");
     var container = L.DomUtil.create('div', 'leaflet-control-mapbox-geocoder leaflet-bar leaflet-control'),
         link = L.DomUtil.create('a', 'leaflet-control-mapbox-geocoder-icon mapbox-icon mapbox-icon-geocoder', container),
         results = L.DomUtil.create('div', 'leaflet-control-mapbox-geocoder-results', container),
@@ -189,6 +193,7 @@ let onAdd = function (map) {
 // 侵入后：
 // 1. select 事件还会发送对应的索引
 let displayResults = function (features) {
+    console.log("displayResults");
     for (let i = 0, l = Math.min(features.length, 5); i < l; i++) {
         var feature = features[i];
         var name = feature.place_name;
@@ -208,7 +213,7 @@ let displayResults = function (features) {
             }, this);
         }, this))(feature, i);
     }
-}
+};
 
 define(function (require) {
     tokens = require("../token");
