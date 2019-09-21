@@ -62,6 +62,7 @@ let bindStrokeInfo = function(strokeList) {
                                 <div class="point-list-layer-body">
                                     <div class="point-list-layer-body-container">`;
 
+    // 点集合
     for(let point of strokeList["default_stroke"]["point_list"]) {
         pane += `<div class="point-list-layer-body-item">
                                             <div class="point-logo">
@@ -96,7 +97,7 @@ let bindStrokeInfo = function(strokeList) {
                                 <div class="point-list-layer-body">
                                     <div class="point-list-layer-body-container">`;
 
-
+    // 路线集合
     for(let route of strokeList["default_stroke"]["route_list"]) {
         pane += `<div class="point-list-layer-body-item">
                                             <div class="point-logo">
@@ -108,7 +109,7 @@ let bindStrokeInfo = function(strokeList) {
                                                 </div>
                                             </div>
                                             <div class="point-font-container">
-                                                <div class="point-font" onclick="" style="">${route["route_name"]}</div>
+                                                <div class="point-font" onclick="routeInfoClick('${route["route_token"]}')" style="">${route["route_name"]}</div>
                                             </div>
                                         </div>`;
     }
@@ -160,4 +161,10 @@ addRoute = function (route_name = '') {
     }).catch(function(e) {
         console.log("addRoute error", e);
     });
+};
+
+routeInfoClick = function (route_token) {
+    // @todo 关闭时点击：获取路径详细信息
+
+    // @todo 打开时点击：关闭详细信息显示
 };

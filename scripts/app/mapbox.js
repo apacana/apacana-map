@@ -204,7 +204,7 @@ userMarketPopup = function(text, place_name, lat, lon) {
                 </div>`
 };
 
-let mapMouseControl = function(mapBox, injects) {
+let mapMouseControl = function(mapBox) {
     return function (map) {
         // 单击事件
         map.on('click', function (e) {
@@ -222,7 +222,7 @@ let mapMouseControl = function(mapBox, injects) {
 };
 
 define(function (require) {
-    // 加载 mapbox 的 token 
+    // 加载 mapbox 的 token
     let tokens = require("./token");
     L.mapbox.accessToken = tokens.mapbox;
 
@@ -231,8 +231,8 @@ define(function (require) {
 
     initSearchMarket(L.mapbox);
 
-    return { 
+    return {
         addGeoControl: addGeoControl(L.mapbox, mapboxInjects),
-        mapMouseControl: mapMouseControl(L.mapbox, mapboxInjects)
+        mapMouseControl: mapMouseControl(L.mapbox),
     };
 });

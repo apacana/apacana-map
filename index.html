@@ -7,6 +7,43 @@
         <link rel="stylesheet" href="./style/map.css">
     </head>
 
+    <style>
+        #inputs,
+        #errors,
+        #directions {
+            position: absolute;
+            width: 33.3333%;
+            max-width: 300px;
+            min-width: 200px;
+        }
+
+        #inputs {
+            z-index: 10;
+            top: 10px;
+            left: 10px;
+        }
+
+        #directions {
+            z-index: 99;
+            background: rgba(0,0,0,.8);
+            top: 0;
+            right: 0;
+            bottom: 0;
+            overflow: auto;
+        }
+
+        #errors {
+            z-index: 8;
+            opacity: 0;
+            padding: 10px;
+            border-radius: 0 0 3px 3px;
+            background: rgba(0,0,0,.25);
+            top: 90px;
+            left: 10px;
+        }
+
+    </style>
+
     <body>
         <div class="spin">
             <p>稍等片刻，旅程开启</p>
@@ -14,67 +51,15 @@
         </div>
         <div class="featureListPanelClass" id="featureListPanel" style="display: block; width: 307px; z-index: 1000; position: absolute; left: 0;">
             <div class="featurelist-paneClass" id="featurelist-pane">
-<!--
-                <div id="featurelist-titlebar-container">
-                    <div id="featurelist-title-bar" class="featurelist-title-barClass">
-                        <div id="map-action-menu" class="map-action-menuClass"></div>
-                        <div id="map-title-desc-bar">
-                            <div id="map-title-desc-bar-name" class="map-title-desc-bar-nameClass">default itinerary</div>
-                            <div id="map-title-desc-bar-time" class="map-title-desc-bar-timeClass">
-                                <div>上次修改时间: 2019-08-31 15:06:54</div>
-                            </div>
-                        </div>
-                        <ul class="map-actionClass">
-                            <div style="height: 16px"></div>
-                        </ul>
-                    </div>
-                </div>
-                <div id="featurelist-scrollable-container" style="max-height: 625px; max-width: 307px; overflow-x: hidden; overflow-y: auto">
-                    <div class="stroke-info">
-                        <div class="point-list" style="position: relative">
-                            <div class="point-list-layer">
-                                <div class="point-list-layer-header">
-                                    <div class="point-list-layer-header-font">行程点集</div>
-                                </div>
-                                <div class="point-list-layer-body">
-                                    <div class="point-list-layer-body-container">
-
-                                        <div class="point-list-layer-body-item">
-                                            <div class="point-logo">
-                                                <div class="point-logo-svg" style="background-image:url(https://mt.google.com/vt/icon/name=icons/onion/SHARED-mymaps-pin-container_4x.png,icons/onion/1899-blank-shape_pin_4x.png&highlight=0288D1,ff000000&scale=2.0); background-position:center; background-size:contain;" iconcode="1899-0288D1"></div>
-                                            </div>
-                                            <div class="point-font-container">
-                                                <div class="point-font">point 1</div>
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="point-list" style="position: relative">
-                            <div class="point-list-layer">
-                                <div class="point-list-layer-header">
-                                    <div class="point-list-layer-header-font">行程路线集</div>
-                                </div>
-                            </div>
-                        </div>
-                        <ul class="map-actionClass">
-                            <div style="height: 0"></div>
-                        </ul>
-                        <div class="point-list" style="position: relative">
-                            <div class="point-list-layer">
-                                <div class="point-list-layer-header">
-                                    <div class="point-list-layer-header-font">历史行程</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
--->
             </div>
         </div>
         <div id="map"></div>
+        <div id='inputs'></div>
+        <div id='errors'></div>
+        <div id='directions'>
+            <div id='routes'></div>
+            <div id='instructions'></div>
+        </div>
         <script data-main="scripts/index" src="./scripts/lib/require.js"></script>
     </body>
 </html>

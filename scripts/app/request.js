@@ -5,6 +5,7 @@ define(function () {
         getUserInfo: "/api/user/info/",
         addPoint: "/api/point/add/",
         addStroke: "/api/stroke/create/",
-        addRoute: "/api/route/create/"
+        addRoute: "/api/route/create/",
+        getRouteInfo: "/api/route/"
     };
 });
