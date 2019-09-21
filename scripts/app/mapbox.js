@@ -110,14 +110,14 @@ let addPoint = function(index, point_id, text, place_name, center, point_type = 
         } else {
             searchMarketToUserMarket(index);
             // change feature list
-            console.log("userInfoMem[\"strokes_info\"]:",userInfoMem["strokes_info"]);
             if (typeof(userInfoMem["strokes_info"]) == "undefined") {
                 userInfoMem.strokes_info = {};
                 userInfoMem.strokes_info.default_stroke = createStrokeVar(data.data["stroke_info"]["stroke_name"], data.data["stroke_info"]["stroke_token"], data.data["stroke_info"]["update_time"]);
             } else {
                 userInfoMem.strokes_info.default_stroke.update_time = data.data["stroke_info"]["update_time"];
             }
-            userInfoMem.strokes_info.default_stroke.point_list.push(packPointInfo(text, place_name, point_id, point_type, data.data["point_info"]["point_name"], center));
+            userInfoMem.strokes_info.default_stroke.point_list.push(packPointInfo(text, place_name, point_id, point_type, data.data["point_info"]["point_token"], center));
+            // console.log("userInfoMem[\"strokes_info\"][\"default_stroke\"]:",userInfoMem["strokes_info"]["default_stroke"]);
             // @todo: 不全部刷新
             let pane = bindStrokeInfo(userInfoMem["strokes_info"]);
             if (document.getElementById('featurelist-pane')) {
@@ -148,8 +148,14 @@ let packPointInfo = function(text, place_name, point_id, point_type, point_token
 
 let searchMarketToUserMarket = function(index) {
     let market = searchMarkets[index];
-    market.setPopupContent(userMarketPopup(market["options"]["text"], market["options"]["place_name"], market["options"]["lat"], market["options"]["lon"]));
-    userMarkers.push(market);
+    market.setPopupContent(userMarketPopup(market["options"]["text"], market["options"]["place_name"], market["options"]["lat"], market["options"]["lon"], popupOption));
+
+    let lat = parseFloat(market["options"]["lat"]);
+    let lon = parseFloat(market["options"]["lon"]);
+    let userMarker = L.marker([lat, lon], {icon: addIcon(L.mapbox), point_id: market["options"]["point_id"], point_type: "search_point"});
+    userMarker.addTo(map);
+    userMarker.bindPopup(userMarketPopup(market["options"]["text"], market["options"]["place_name"], lat, lon), popupOption);
+    userMarkers.push(userMarker);
 };
 
 selectUserMarket = function(point_id, point_type) {

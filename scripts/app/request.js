@@ -4,6 +4,7 @@ define(function () {
         userPrepare: "/api/user/prepare/",
         getUserInfo: "/api/user/info/",
         addPoint: "/api/point/add/",
-        addStroke: "/api/stroke/create/"
+        addStroke: "/api/stroke/create/",
+        addRoute: "/api/route/create/"
     };
 });

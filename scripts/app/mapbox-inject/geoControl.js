@@ -30,7 +30,6 @@ let debounce = function (fnc, delay) {
 // 1. 4 字符长度以下不会触发自动搜索，且关闭搜索提示
 // 2. 能够触发搜索中状态
 let autocomplete = function () {
-    console.log("autocomplete");
     let val = this._input.value;
     if (gblen(val) < 4) return this._updateAutocomplete(false)();
 
@@ -47,7 +46,6 @@ let autocomplete = function () {
 // 3. 对搜索结果文本部分进行转码
 // 4. @TODO 更明显的搜索无结果显示(应由外层处理，通过 notfound 传递出去)
 let updateAutocomplete = function (jump) {
-    console.log("updateAutocomplete");
     let that = this;
 
     return function (err, resp) {
@@ -130,7 +128,6 @@ let updateAutocomplete = function (jump) {
 // 2. 若最新数据长度为 0 ，发送 notfound 事件
 // 3. 若没有最新数据，撤销正在等待的搜索，立即发送搜索，并跳转第一个位置
 let geocode = function (e) {
-    console.log("geocode");
     L.DomEvent.preventDefault(e);
     // 说明是最新的数据可以直接使用
     if (this.states.isSearch) {
@@ -156,7 +153,6 @@ let geocode = function (e) {
 // 2. submit 事件改为特殊的选中第一个
 // 3. 输入框状态可以由 icon 表现
 let onAdd = function (map) {
-    console.log("onAdd");
     var container = L.DomUtil.create('div', 'leaflet-control-mapbox-geocoder leaflet-bar leaflet-control'),
         link = L.DomUtil.create('a', 'leaflet-control-mapbox-geocoder-icon mapbox-icon mapbox-icon-geocoder', container),
         results = L.DomUtil.create('div', 'leaflet-control-mapbox-geocoder-results', container),
@@ -193,7 +189,6 @@ let onAdd = function (map) {
 // 侵入后：
 // 1. select 事件还会发送对应的索引
 let displayResults = function (features) {
-    console.log("displayResults");
     for (let i = 0, l = Math.min(features.length, 5); i < l; i++) {
         var feature = features[i];
         var name = feature.place_name;
