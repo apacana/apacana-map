@@ -6,6 +6,8 @@ define(function () {
         addPoint: "/api/point/add/",
         addStroke: "/api/stroke/create/",
         addRoute: "/api/route/create/",
-        getRouteInfo: "/api/route/"
+        getRouteInfo: "/api/route/",
+
+        mapBoxDomain: "https://api.mapbox.com/directions/v5/",
     };
 });

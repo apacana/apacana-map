@@ -1,5 +1,7 @@
 let getMap = function(id) {    
     let map = L.map(id, {
+        // 天安门39.908898,116.394293
+        // 华盛顿38.90378612315598,-77.04753807398001
         center: [39.908898,116.394293],
         zoom: 13,
         zoomControl: false

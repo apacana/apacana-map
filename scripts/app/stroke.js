@@ -134,6 +134,36 @@ let bindStrokeInfo = function(strokeList) {
     return pane
 };
 
+getDirection = function (start_lon, start_lat, end_lon, end_lat, profile = 'driving-traffic') {
+    let url = requestConfig.mapBoxDomain + 'mapbox/' + profile + '/' + start_lon + '%2C' + start_lat + '%3B' + end_lon + '%2C' + end_lat + '.json?access_token=pk.eyJ1IjoiYWFyb25saWRtYW4iLCJhIjoiNTVucTd0TSJ9.wVh5WkYXWJSBgwnScLupiQ&geometries=geojson&overview=full';
+    fetch(url, {
+        method: 'GET',
+    }).then(response => {
+        return response.json();
+    }).then(data => {
+        console.log(data);
+        if (data.code !== 'Ok') {
+            console.log("getDirection failed, code:", data.code);
+        } else {
+            let coordinates = changeLonLat(data.routes[0].geometry.coordinates);
+
+            // print to map
+            let polyline = L.polyline(coordinates, {color: '#5eb0cc'});
+            polyline.addTo(map);
+        }
+    }).catch(function(e) {
+        console.log("getDirection error", e);
+    });
+};
+
+changeLonLat = function(coordinates) {
+    let newCoordinates = [];
+    for(let item of coordinates) {
+        newCoordinates.push([item[1], item[0]]);
+    }
+    return newCoordinates
+};
+
 addRoute = function (route_name = '') {
     fetch(requestConfig.domain + requestConfig.addRoute, {
         credentials: 'include',
