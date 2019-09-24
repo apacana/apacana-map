@@ -60,24 +60,11 @@ let bindStrokeInfo = function(strokeList) {
                                     <div class="point-list-layer-header-font">行程点集</div>
                                 </div>
                                 <div class="point-list-layer-body">
-                                    <div class="point-list-layer-body-container">`;
+                                    <div class="point-list-layer-body-container" id="point_list">`;
 
     // 点集合
     for(let point of strokeList["default_stroke"]["point_list"]) {
-        pane += `<div class="point-list-layer-body-item">
-                                            <div class="point-logo">
-                                                <div class="point-logo-svg" style="background-position:center; background-size:contain;" iconcode="1899-0288D1">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="fill: #0052CC"><g>
-                                                            <path fill="none" d="M0 0h24v24H0z"/>
-                                                            <path d="M12 23.728l-6.364-6.364a9 9 0 1 1 12.728 0L12 23.728zm4.95-7.778a7 7 0 1 0-9.9 0L12 20.9l4.95-4.95zM12 13a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/>
-                                                        </g>
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                            <div class="point-font-container">
-                                                <div class="point-font" onclick="selectUserMarket('${point["point_id"]}', '${point["point_type"]}')">${point["text"]}</div>
-                                            </div>
-                                        </div>`;
+        pane += createPointHtml(point);
     }
 
     pane += `</div>
@@ -95,25 +82,12 @@ let bindStrokeInfo = function(strokeList) {
                                     <div class="point-list-layer-header-font">行程路线集</div>
                                 </div>
                                 <div class="point-list-layer-body">
-                                    <div class="point-list-layer-body-container">`;
+                                    <div class="point-list-layer-body-container" id="route_list">`;
 
     // 路线集合
     for(let route of strokeList["default_stroke"]["route_list"]) {
-        pane += `<div class="point-list-layer-body-item">
-                                            <div class="point-logo">
-                                                <div class="point-logo-svg" style="background-position:center; background-size:contain;" iconcode="1899-0288D1">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="21" height="21" style="fill: #0052CC">
-                                                        <path fill="none" d="M0 0h24v24H0z"/>
-                                                        <path d="M4 15V8.5a4.5 4.5 0 0 1 9 0v7a2.5 2.5 0 1 0 5 0V8.83a3.001 3.001 0 1 1 2 0v6.67a4.5 4.5 0 1 1-9 0v-7a2.5 2.5 0 0 0-5 0V15h3l-4 5-4-5h3zm15-8a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" fill="#0052CC"/>
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                            <div class="point-font-container">
-                                                <div class="point-font" onclick="routeInfoClick('${route["route_token"]}')" style="">${route["route_name"]}</div>
-                                            </div>
-                                        </div>`;
+        pane += createRouteHtml(route);
     }
-
 
     pane += `</div>
                                 </div>
@@ -131,6 +105,61 @@ let bindStrokeInfo = function(strokeList) {
                         </div>
                     </div>
                 </div>`;
+    return pane
+};
+
+createPointHtml = function (point) {
+    pane = `<div class="point-list-layer-body-item">
+                                            <div class="point-logo">
+                                                <div class="point-logo-svg" style="background-position:center; background-size:contain;" iconcode="1899-0288D1">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="fill: #0052CC"><g>
+                                                            <path fill="none" d="M0 0h24v24H0z"/>
+                                                            <path d="M12 23.728l-6.364-6.364a9 9 0 1 1 12.728 0L12 23.728zm4.95-7.778a7 7 0 1 0-9.9 0L12 20.9l4.95-4.95zM12 13a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/>
+                                                        </g>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            <div class="point-font-container">
+                                                <div class="point-font" onclick="selectUserMarket('${point["point_id"]}', '${point["point_type"]}')">${point["text"]}</div>
+                                            </div>
+                                        </div>`;
+    return pane;
+};
+
+createRouteHtml = function (route) {
+    lastRoute = `route_item_${route["route_token"]}`;
+    pane = `<div class="point-list-layer-body-item" id="route_item_${route["route_token"]}">
+                                            <div class="point-logo">
+                                                <div class="point-logo-svg" style="background-position:center; background-size:contain;" iconcode="1899-0288D1">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="21" height="21" style="fill: #0052CC">
+                                                        <path fill="none" d="M0 0h24v24H0z"/>
+                                                        <path d="M4 15V8.5a4.5 4.5 0 0 1 9 0v7a2.5 2.5 0 1 0 5 0V8.83a3.001 3.001 0 1 1 2 0v6.67a4.5 4.5 0 1 1-9 0v-7a2.5 2.5 0 0 0-5 0V15h3l-4 5-4-5h3zm15-8a1 1 0 1 0 0-2 1 1 0 0 0 0 2z" fill="#0052CC"/>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            <div class="point-font-container">
+                                                <div class="point-font" id="" onclick="routeInfoClick('${route["route_token"]}')" style="">${route["route_name"]}</div>
+                                            </div>
+                                        </div>`;
+    if (route.status === 1) {
+        // @todo request route info
+        pane += `            <div style="padding-left: 21px" id="route_info_list_${route["route_token"]}">   
+                       <div class="point-list-layer-body-item">
+                                            <div class="point-logo">
+                                                <div class="point-logo-svg" style="background-position:center; background-size:contain;" iconcode="1899-0288D1">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="fill: #0052CC"><g>
+                                                            <path fill="none" d="M0 0h24v24H0z"/>
+                                                            <path d="M12 23.728l-6.364-6.364a9 9 0 1 1 12.728 0L12 23.728zm4.95-7.778a7 7 0 1 0-9.9 0L12 20.9l4.95-4.95zM12 13a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/>
+                                                        </g>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            <div class="point-font-container">
+                                                <div class="point-font" onclick="selectUserMarket('1', '2')">1122111111111111111111111111111111111133</div>
+                                            </div>
+                                        </div></div>    `;
+        getRoute(route["route_token"]);
+    }
     return pane
 };
 
@@ -180,13 +209,15 @@ addRoute = function (route_name = '') {
             userInfoMem.strokes_info.default_stroke.route_list.push(data.data);
             userInfoMem.strokes_info.default_stroke.update_time = data.data["update_time"];
             console.log(userInfoMem.strokes_info.default_stroke.route_list);
-            // @todo: 不全部刷新
-            let pane = bindStrokeInfo(userInfoMem["strokes_info"]);
-            if (document.getElementById('featurelist-pane')) {
-                document.getElementById('featurelist-pane').innerHTML = pane;
+            // 刷新route_list
+            if (document.getElementById('route_list')) {
+                let newNode = document.createElement("div");
+                newNode.innerHTML = createRouteHtml(data.data);
+                document.getElementById('route_list').insertBefore(newNode, null);
             } else {
-                console.log("getElementById featurelist-pane failed");
+                console.log("getElementById route_list failed");
             }
+            // @todo 更新时间
         }
     }).catch(function(e) {
         console.log("addRoute error", e);
@@ -194,7 +225,78 @@ addRoute = function (route_name = '') {
 };
 
 routeInfoClick = function (route_token) {
-    // @todo 关闭时点击：获取路径详细信息
-
-    // @todo 打开时点击：关闭详细信息显示
+    for (let route of userInfoMem.strokes_info.default_stroke.route_list) {
+        if (route["route_token"] === route_token) {
+            console.log(route);
+            if (route["status"] === 0) {
+                // @todo 关闭时点击：获取路径详细信息
+                route["status"] = 1;
+            } else if (route["status"] === 1) {
+                // 打开时点击：关闭详细信息显示
+                route["status"] = 0;
+                closeRoute(route_token);
+            }
+            return
+        }
+    }
 };
+
+closeRoute = function (route_token) {
+    // @todo 更新列表
+
+    // 更新route status
+    fetch(requestConfig.domain + requestConfig.closeRoute, {
+        credentials: 'include',
+        method: 'POST',
+        body: '{"route_token": "' + route_token + '"}',
+    }).then(response => {
+        return response.json();
+    }).then(data => {
+        console.log(data);
+        if (data.code !== 0) {
+            console.log("closeRoute failed, code:", data.code);
+        }
+    }).catch(function(e) {
+        console.log("closeRoute error");
+    });
+};
+
+getRoute = function (route_token) {
+    let url = requestConfig.domain + requestConfig.getRouteInfo + route_token + '/';
+    fetch(url, {
+        credentials: 'include',
+        method: 'GET',
+    }).then(response => {
+        return response.json();
+    }).then(data => {
+        console.log(data);
+        if (data.code !== 0) {
+            console.log("getRouteInfo failed, code:", data.code);
+        } else {
+            updateRouteInfoList(data.data);
+        }
+    }).catch(function(e) {
+        console.log("getRouteInfo error", e);
+    });
+};
+
+updateRouteInfoList = async function (route_info) {
+    while (mainPrint === true) {
+        await sleep(500);
+    }
+    // print to route-info-list
+    pane = "";
+    for(let point of route_info["route_point"]) {
+        pane += createPointHtml(point);
+    }
+    let id = `route_info_list_${route_info["route_token"]}`;
+    if (document.getElementById(id)) {
+        document.getElementById(id).innerHTML = pane;
+    } else {
+        console.log("getElementById failed");
+    }
+};
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+}

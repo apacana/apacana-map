@@ -1,5 +1,7 @@
 userInfoMem = null;
 defaultStroke = null;
+lastRoute = "";
+mainPrint = false;
 
 let makeUserPrepareRequest = function() {
     fetch(requestConfig.domain + requestConfig.userPrepare, {
@@ -54,12 +56,14 @@ let makeGetUserInfoRequest = function() {
             } else {
                 defaultStroke = data.data["strokes_info"]["default_stroke"];
                 setUserMarket(data.data["strokes_info"]["default_stroke"]["point_list"]);
+                mainPrint = true;
                 let pane = bindStrokeInfo(data.data["strokes_info"]);
                 if (document.getElementById('featurelist-pane')) {
                     document.getElementById('featurelist-pane').innerHTML = pane;
                 } else {
                     console.log("getElementById featurelist-pane failed");
                 }
+                mainPrint = false;
             }
             console.log(defaultStroke);
         }

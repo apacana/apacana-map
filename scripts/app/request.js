@@ -7,6 +7,7 @@ define(function () {
         addStroke: "/api/stroke/create/",
         addRoute: "/api/route/create/",
         getRouteInfo: "/api/route/",
+        closeRoute: "/api/route/close/",
 
         mapBoxDomain: "https://api.mapbox.com/directions/v5/",
     };

@@ -118,12 +118,13 @@ let addPoint = function(index, point_id, text, place_name, center, point_type = 
             }
             userInfoMem.strokes_info.default_stroke.point_list.push(packPointInfo(text, place_name, point_id, point_type, data.data["point_info"]["point_token"], center));
             // console.log("userInfoMem[\"strokes_info\"][\"default_stroke\"]:",userInfoMem["strokes_info"]["default_stroke"]);
-            // @todo: 不全部刷新
-            let pane = bindStrokeInfo(userInfoMem["strokes_info"]);
-            if (document.getElementById('featurelist-pane')) {
-                document.getElementById('featurelist-pane').innerHTML = pane;
+            // 刷新point_list
+            if (document.getElementById('point_list')) {
+                let newNode = document.createElement("div");
+                newNode.innerHTML = createPointHtml(data.data["point_info"]);
+                document.getElementById('point_list').insertBefore(newNode, null);
             } else {
-                console.log("getElementById featurelist-pane failed");
+                console.log("getElementById point_list failed");
             }
         }
     }).catch(function(e) {
