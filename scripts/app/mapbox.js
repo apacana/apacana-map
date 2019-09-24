@@ -126,6 +126,7 @@ let addPoint = function(index, point_id, text, place_name, center, point_type = 
             } else {
                 console.log("getElementById point_list failed");
             }
+            updateStrokeUpdateTime(data.data["stroke_info"]["update_time"]);
         }
     }).catch(function(e) {
         console.log("addPoint error:", e);
@@ -209,17 +210,24 @@ let mapMouseControl = function(mapBox) {
     return function (map) {
         // 单击事件
         map.on('click', function (e) {
-            console.log("map click", e, mapBox.GeocoderControl.prototype);
+            closeSearchResult();
+            console.log("map click");
         });
         // 右键事件
         map.on('contextmenu', function (e) {
+            closeSearchResult();
             console.log("map contextmenu");
         });
         // 地图拖动事件
         map.on('dragstart', function (e) {
+            closeSearchResult();
             console.log("map dragstart");
         });
     }
+};
+
+closeSearchResult = function() {
+    document.querySelector(".leaflet-control-mapbox-geocoder-results").classList.add("is-none");
 };
 
 define(function (require) {

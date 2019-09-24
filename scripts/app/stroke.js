@@ -44,7 +44,7 @@ let bindStrokeInfo = function(strokeList) {
                         <div id="map-title-desc-bar">
                             <div id="map-title-desc-bar-name" class="map-title-desc-bar-nameClass">${strokeList["default_stroke"]["stroke_name"]}</div>
                             <div id="map-title-desc-bar-time" class="map-title-desc-bar-timeClass">
-                                <div>上次修改时间: ${strokeList["default_stroke"]["update_time"]}</div>
+                                <div id="stroke_update_time">上次修改时间: ${strokeList["default_stroke"]["update_time"]}</div>
                             </div>
                         </div>
                         <ul class="map-actionClass">
@@ -140,24 +140,10 @@ createRouteHtml = function (route) {
                                             <div class="point-font-container">
                                                 <div class="point-font" id="" onclick="routeInfoClick('${route["route_token"]}')" style="">${route["route_name"]}</div>
                                             </div>
-                                        </div>`;
+                                        </div>
+                                            <div style="padding-left: 21px" id="route_info_list_${route["route_token"]}"></div>`;
     if (route.status === 1) {
-        // @todo request route info
-        pane += `            <div style="padding-left: 21px" id="route_info_list_${route["route_token"]}">   
-                       <div class="point-list-layer-body-item">
-                                            <div class="point-logo">
-                                                <div class="point-logo-svg" style="background-position:center; background-size:contain;" iconcode="1899-0288D1">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="fill: #0052CC"><g>
-                                                            <path fill="none" d="M0 0h24v24H0z"/>
-                                                            <path d="M12 23.728l-6.364-6.364a9 9 0 1 1 12.728 0L12 23.728zm4.95-7.778a7 7 0 1 0-9.9 0L12 20.9l4.95-4.95zM12 13a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/>
-                                                        </g>
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                            <div class="point-font-container">
-                                                <div class="point-font" onclick="selectUserMarket('1', '2')">1122111111111111111111111111111111111133</div>
-                                            </div>
-                                        </div></div>    `;
+        // request route info
         getRoute(route["route_token"]);
     }
     return pane
@@ -217,11 +203,20 @@ addRoute = function (route_name = '') {
             } else {
                 console.log("getElementById route_list failed");
             }
-            // @todo 更新时间
+            // 更新时间
+            updateStrokeUpdateTime(data.data["update_time"]);
         }
     }).catch(function(e) {
         console.log("addRoute error", e);
     });
+};
+
+updateStrokeUpdateTime = function (nowTime) {
+    if (document.getElementById('stroke_update_time')) {
+        document.getElementById('stroke_update_time').innerHTML = `上次修改时间: ${nowTime}`
+    } else {
+        console.log("getElementById failed");
+    }
 };
 
 routeInfoClick = function (route_token) {
@@ -229,8 +224,9 @@ routeInfoClick = function (route_token) {
         if (route["route_token"] === route_token) {
             console.log(route);
             if (route["status"] === 0) {
-                // @todo 关闭时点击：获取路径详细信息
+                // 关闭时点击：获取路径详细信息
                 route["status"] = 1;
+                openRoute(route_token);
             } else if (route["status"] === 1) {
                 // 打开时点击：关闭详细信息显示
                 route["status"] = 0;
@@ -241,8 +237,27 @@ routeInfoClick = function (route_token) {
     }
 };
 
+openRoute = function (route_token) {
+    if (typeof(routeInfoMap.get(route_token)) === 'undefined') {
+    } else {
+        let id = `route_info_list_${route_token}`;
+        if (document.getElementById(id)) {
+            document.getElementById(id).innerHTML = routeInfoMap.get(route_token);
+        } else {
+            console.log("getElementById failed");
+        }
+    }
+    getRoute(route_token);
+};
+
 closeRoute = function (route_token) {
-    // @todo 更新列表
+    // 更新列表
+    let id = `route_info_list_${route_token}`;
+    if (document.getElementById(id)) {
+        document.getElementById(id).innerHTML = '';
+    } else {
+        console.log("getElementById failed");
+    }
 
     // 更新route status
     fetch(requestConfig.domain + requestConfig.closeRoute, {
@@ -289,6 +304,7 @@ updateRouteInfoList = async function (route_info) {
     for(let point of route_info["route_point"]) {
         pane += createPointHtml(point);
     }
+    routeInfoMap.set(route_info["route_token"], pane);
     let id = `route_info_list_${route_info["route_token"]}`;
     if (document.getElementById(id)) {
         document.getElementById(id).innerHTML = pane;

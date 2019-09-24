@@ -2,6 +2,7 @@ userInfoMem = null;
 defaultStroke = null;
 lastRoute = "";
 mainPrint = false;
+routeInfoMap = new Map();
 
 let makeUserPrepareRequest = function() {
     fetch(requestConfig.domain + requestConfig.userPrepare, {

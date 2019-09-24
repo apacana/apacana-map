@@ -158,7 +158,7 @@ let onAdd = function (map) {
         results = L.DomUtil.create('div', 'leaflet-control-mapbox-geocoder-results', container),
         wrap = L.DomUtil.create('div', 'leaflet-control-mapbox-geocoder-wrap', container),
         form = L.DomUtil.create('form', 'leaflet-control-mapbox-geocoder-form', wrap),
-        input = L.DomUtil.create('input', '', form);
+        input = L.DomUtil.create('input', 'leaflet-control-mapbox-geocoder-input', form);
 
     link.href = '#';
     link.innerHTML = '&nbsp;';
@@ -168,6 +168,9 @@ let onAdd = function (map) {
 
     L.DomEvent.on(form, 'submit', this._geocode, this);
     L.DomEvent.on(input, 'input', debounce(this._autocomplete, 500), this);
+    L.DomEvent.addListener(input, 'focus', function (e) {
+        document.querySelector(".leaflet-control-mapbox-geocoder-results").classList.remove("is-none");
+    });
     L.DomEvent.disableClickPropagation(container);
 
     // 输入框状态可以由 icon 表现
