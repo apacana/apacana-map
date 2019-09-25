@@ -5,6 +5,8 @@ popupOption = {
     autoPanPaddingTopLeft: L.point(350, 80),
     autoPanPaddingBottomRight: L.point(100, 100)
 };
+addRoutePointSwitch = false;
+addRoutePointToken = '';
 
 let initSearchMarket = function (mapBox) {
     searchMarkets = [0,0,0,0,0].map(() => {
@@ -108,7 +110,7 @@ let addPoint = function(index, point_id, text, place_name, center, point_type = 
         if (data.code !== 0) {
             console.log("addPoint failed, code:", data.code);
         } else {
-            searchMarketToUserMarket(index);
+            searchMarketToUserMarket(index, data.data["point_info"]["point_token"]);
             // change feature list
             if (typeof(userInfoMem["strokes_info"]) == "undefined") {
                 userInfoMem.strokes_info = {};
@@ -148,13 +150,13 @@ let packPointInfo = function(text, place_name, point_id, point_type, point_token
     return point;
 };
 
-let searchMarketToUserMarket = function(index) {
+let searchMarketToUserMarket = function(index, point_token) {
     let market = searchMarkets[index];
     market.setPopupContent(userMarketPopup(market["options"]["text"], market["options"]["place_name"], market["options"]["lat"], market["options"]["lon"], popupOption));
 
     let lat = parseFloat(market["options"]["lat"]);
     let lon = parseFloat(market["options"]["lon"]);
-    let userMarker = L.marker([lat, lon], {icon: addIcon(L.mapbox), point_id: market["options"]["point_id"], point_type: "search_point"});
+    let userMarker = L.marker([lat, lon], {icon: addIcon(L.mapbox), point_id: market["options"]["point_id"], point_type: "search_point", point_token: point_token, text: market["options"]["text"]});
     userMarker.addTo(map);
     userMarker.bindPopup(userMarketPopup(market["options"]["text"], market["options"]["place_name"], lat, lon), popupOption);
     userMarkers.push(userMarker);
@@ -163,6 +165,11 @@ let searchMarketToUserMarket = function(index) {
 selectUserMarket = function(point_id, point_type) {
     for(let point of userMarkers) {
         if (point["options"]["point_id"] === point_id && point["options"]["point_type"] === point_type) {
+            if (addRoutePointSwitch === true) {
+                console.log("point:", point._latlng);
+                addRoutePoint(addRoutePointToken, point);
+                removeRoutePointSelect(addRoutePointToken);
+            }
             point.openPopup();
         }
     }
@@ -180,7 +187,7 @@ let allowAddSearchMarket = function(point_id, point_type = 'search_point') {
 setUserMarket = function (pointList) {
     userMarkers = [];
     for(let point of pointList) {
-        let marker = L.marker([-360, -360], {icon: addIcon(L.mapbox), point_id: point["point_id"], point_type: point["point_type"]});
+        let marker = L.marker([-360, -360], {icon: addIcon(L.mapbox), point_id: point["point_id"], point_type: point["point_type"], point_token: point["point_token"], text: point["text"]});
         marker.addTo(map);
         let [lon, lat] = point["center"].split(",");
         marker.setLatLng([lat, lon]);

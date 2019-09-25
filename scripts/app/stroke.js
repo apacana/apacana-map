@@ -1,5 +1,6 @@
 checkBoxOpen = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="21" height="21"><path fill="none" d="M0 0h24v24H0z"/><path d="M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm1 2v14h14V5H5zm6.003 11L6.76 11.757l1.414-1.414 2.829 2.829 5.656-5.657 1.415 1.414L11.003 16z" fill="#000"/></svg>`;
 checkBoxClose = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="21" height="21"><path fill="none" d="M0 0h24v24H0z"/><path d="M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm1 2v14h14V5H5z" fill="#000"/></svg>`;
+routePointMap = new Map();
 
 addFirstStroke = function (stroke_name = '') {
     fetch(requestConfig.domain + requestConfig.addStroke, {
@@ -130,7 +131,7 @@ createPointHtml = function (point) {
 
 createRouteHtml = function (route) {
     lastRoute = `route_item_${route["route_token"]}`;
-    pane = `                            <div class="point-list-layer-body-item" id="route_item_${route["route_token"]}" style="padding-left: 25px;">
+    let pane = `                            <div class="point-list-layer-body-item" id="route_item_${route["route_token"]}" style="padding-left: 25px;">
                                             <div id="route_check_box_${route["route_token"]}" class="" style="position: absolute; right: 0; cursor: pointer;height: 21px; margin-right: 250px; margin-top: 1px; margin-bottom: 2px; opacity: 0.8; top: 0; width: 21px;" onclick="routeInfoClick('${route["route_token"]}')">`;
     if (route.status === 1) {
         pane += checkBoxOpen;
@@ -158,7 +159,7 @@ createRouteHtml = function (route) {
     return pane
 };
 
-getDirection = function (start_lon, start_lat, end_lon, end_lat, profile = 'driving-traffic') {
+getDirection = function (start_lon, start_lat, end_lon, end_lat, route_token, point_token, profile = 'driving-traffic') {
     let url = requestConfig.mapBoxDomain + 'mapbox/' + profile + '/' + start_lon + '%2C' + start_lat + '%3B' + end_lon + '%2C' + end_lat + '.json?access_token=pk.eyJ1IjoiYWFyb25saWRtYW4iLCJhIjoiNTVucTd0TSJ9.wVh5WkYXWJSBgwnScLupiQ&geometries=geojson&overview=full';
     fetch(url, {
         method: 'GET',
@@ -169,11 +170,15 @@ getDirection = function (start_lon, start_lat, end_lon, end_lat, profile = 'driv
         if (data.code !== 'Ok') {
             console.log("getDirection failed, code:", data.code);
         } else {
-            let coordinates = changeLonLat(data.routes[0].geometry.coordinates);
+            let direction = '';
+            if (data.routes.length > 0) {
+                let coordinates = changeLonLat(data.routes[0].geometry.coordinates);
 
-            // print to map
-            let polyline = L.polyline(coordinates, {color: '#5eb0cc'});
-            polyline.addTo(map);
+                // print to map
+                let polyline = L.polyline(coordinates, {color: 'red'}); // 5eb0cc
+                polyline.addTo(map);
+                addRoutePointRequest(route_token, point_token, JSON.stringify(data.routes[0]));
+            }
         }
     }).catch(function(e) {
         console.log("getDirection error", e);
@@ -312,12 +317,15 @@ updateRouteInfoList = async function (route_info) {
         await sleep(500);
     }
     // print to route-info-list
-    pane = "";
+    let pane = "";
+    let pointInfoList = [];
     for(let point of route_info["route_point"]) {
         pane += createPointHtml(point);
+        pointInfoList.push(point);
     }
     pane += addRoutePointLogo(route_info["route_token"]);
     routeInfoMap.set(route_info["route_token"], pane);
+    routePointMap.set(route_info["route_token"], pointInfoList);
     let id = `route_info_list_${route_info["route_token"]}`;
     if (document.getElementById(id)) {
         document.getElementById(id).innerHTML = pane;
@@ -327,13 +335,71 @@ updateRouteInfoList = async function (route_info) {
 };
 
 addRoutePointLogo = function (route_token) {
-    return `<div id="" style="cursor: pointer; font: 400 13px Roboto, Arial, sans-serif; color: #777777; width: 65px;" onclick="addRoutePointPrepare('${route_token}')">
+    return `<div id="add_route_point_info_${route_token}" style="cursor: pointer; font: 400 13px Roboto, Arial, sans-serif; color: #777777; width: 65px;" onclick="addRoutePointPrepare('${route_token}')">
                     <div>添加路线点</div>
             </div>`;
 };
 
 addRoutePointPrepare = function (route_token) {
-    console.log("add route point", route_token)
+    if (addRoutePointToken === route_token) {
+        // close add route point switch
+        removeRoutePointSelect(route_token);
+    } else if (addRoutePointToken === '') {
+        addRoutePointSelect(route_token);
+    } else {
+        removeRoutePointSelect(addRoutePointToken);
+        addRoutePointSelect(route_token);
+    }
+};
+
+addRoutePointSelect = function (route_token) {
+    // 添加选中标示
+    document.getElementById(`add_route_point_info_${route_token}`).style.color = '#444444';
+    addRoutePointSwitch = true;
+    addRoutePointToken = route_token;
+};
+
+removeRoutePointSelect = function (route_token) {
+    // 添加取消标示
+    document.getElementById(`add_route_point_info_${route_token}`).style.color = '#777777';
+    addRoutePointSwitch = false;
+    addRoutePointToken = '';
+};
+
+addRoutePoint = function (route_token, point) {
+    if (typeof(routePointMap.get(route_token)) === 'undefined') {
+        console.log("routePointMap error");
+    }
+    let routePoint = routePointMap.get(route_token);
+    if (routePoint.length > 0) {
+        // 生成路线
+        let nearPoint = routePoint[routePoint.length - 1];
+        let [lon, lat] = nearPoint["center"].split(",");
+        getDirection(lon, lat, point._latlng["lng"], point._latlng["lat"], route_token, point["options"]["point_token"]);
+    } else {
+        addRoutePointRequest(route_token, point["options"]["point_token"]);
+    }
+
+    // add to feature list
+    routePoint.push({center: `${point._latlng["lng"]},${point._latlng["lat"]}`, direction: '', point_id: point["options"]["point_id"], point_type: point["options"]["point_type"], text: point["options"]["text"]});
+    let pane = "";
+    for(let point of routePoint) {
+        pane += createPointHtml(point);
+    }
+    pane += addRoutePointLogo(route_token);
+    routeInfoMap.set(route_token, pane);
+    routePointMap.set(route_token, routePoint);
+    let id = `route_info_list_${route_token}`;
+    if (document.getElementById(id)) {
+        document.getElementById(id).innerHTML = pane;
+    } else {
+        console.log("getElementById failed");
+    }
+};
+
+addRoutePointRequest = function (route_token, point_token, direction = '') {
+    // todo addRoutePointRequest
+    console.log("make addRoutePointRequest", route_token, point_token, direction)
 };
 
 function sleep(ms) {
