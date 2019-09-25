@@ -1,4 +1,6 @@
-// 留白
+checkBoxOpen = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="21" height="21"><path fill="none" d="M0 0h24v24H0z"/><path d="M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm1 2v14h14V5H5zm6.003 11L6.76 11.757l1.414-1.414 2.829 2.829 5.656-5.657 1.415 1.414L11.003 16z" fill="#000"/></svg>`;
+checkBoxClose = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="21" height="21"><path fill="none" d="M0 0h24v24H0z"/><path d="M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm1 2v14h14V5H5z" fill="#000"/></svg>`;
+
 addFirstStroke = function (stroke_name = '') {
     fetch(requestConfig.domain + requestConfig.addStroke, {
         credentials: 'include',
@@ -73,15 +75,15 @@ let bindStrokeInfo = function(strokeList) {
                         </div>
                         <div class="point-list" style="position: relative">
                             <div class="point-list-layer">
-                                <div id="map-action-menu" class="" style="cursor: pointer;height: 21px; margin-right: 8px; opacity: .5; top: 12px; width: 21px;">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="21" height="21" onclick="addRoute()">
+                                <div id="map-action-menu" class="" style="cursor: pointer;height: 21px; margin-right: 8px; opacity: .5; top: 12px; width: 21px;" onclick="addRoute()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="21" height="21">
                                             <path fill="none" d="M0 0h24v24H0z"/><path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z" fill="#000"/>
                                         </svg>
                                 </div>
-                                <div class="point-list-layer-header">
+                                <div class="point-list-layer-header" style="max-width: 250px;">
                                     <div class="point-list-layer-header-font">行程路线集</div>
                                 </div>
-                                <div class="point-list-layer-body">
+                                <div class="point-list-layer-body" style="margin-left: 0">
                                     <div class="point-list-layer-body-container" id="route_list">`;
 
     // 路线集合
@@ -128,7 +130,14 @@ createPointHtml = function (point) {
 
 createRouteHtml = function (route) {
     lastRoute = `route_item_${route["route_token"]}`;
-    pane = `<div class="point-list-layer-body-item" id="route_item_${route["route_token"]}">
+    pane = `                            <div class="point-list-layer-body-item" id="route_item_${route["route_token"]}" style="padding-left: 25px;">
+                                            <div id="route_check_box_${route["route_token"]}" class="" style="position: absolute; right: 0; cursor: pointer;height: 21px; margin-right: 250px; margin-top: 1px; margin-bottom: 2px; opacity: 0.8; top: 0; width: 21px;" onclick="routeInfoClick('${route["route_token"]}')">`;
+    if (route.status === 1) {
+        pane += checkBoxOpen;
+    } else {
+        pane += checkBoxClose;
+    }
+    pane += `</div>
                                             <div class="point-logo">
                                                 <div class="point-logo-svg" style="background-position:center; background-size:contain;" iconcode="1899-0288D1">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="21" height="21" style="fill: #0052CC">
@@ -141,7 +150,7 @@ createRouteHtml = function (route) {
                                                 <div class="point-font" id="" onclick="routeInfoClick('${route["route_token"]}')" style="">${route["route_name"]}</div>
                                             </div>
                                         </div>
-                                            <div style="padding-left: 21px" id="route_info_list_${route["route_token"]}"></div>`;
+                                            <div style="padding-left: 46px" id="route_info_list_${route["route_token"]}"></div>`;
     if (route.status === 1) {
         // request route info
         getRoute(route["route_token"]);
@@ -247,6 +256,8 @@ openRoute = function (route_token) {
             console.log("getElementById failed");
         }
     }
+
+    document.getElementById(`route_check_box_${route_token}`).innerHTML = checkBoxOpen;
     getRoute(route_token);
 };
 
@@ -258,6 +269,7 @@ closeRoute = function (route_token) {
     } else {
         console.log("getElementById failed");
     }
+    document.getElementById(`route_check_box_${route_token}`).innerHTML = checkBoxClose;
 
     // 更新route status
     fetch(requestConfig.domain + requestConfig.closeRoute, {
@@ -304,6 +316,7 @@ updateRouteInfoList = async function (route_info) {
     for(let point of route_info["route_point"]) {
         pane += createPointHtml(point);
     }
+    pane += addRoutePointLogo(route_info["route_token"]);
     routeInfoMap.set(route_info["route_token"], pane);
     let id = `route_info_list_${route_info["route_token"]}`;
     if (document.getElementById(id)) {
@@ -311,6 +324,16 @@ updateRouteInfoList = async function (route_info) {
     } else {
         console.log("getElementById failed");
     }
+};
+
+addRoutePointLogo = function (route_token) {
+    return `<div id="" style="cursor: pointer; font: 400 13px Roboto, Arial, sans-serif; color: #777777; width: 65px;" onclick="addRoutePointPrepare('${route_token}')">
+                    <div>添加路线点</div>
+            </div>`;
+};
+
+addRoutePointPrepare = function (route_token) {
+    console.log("add route point", route_token)
 };
 
 function sleep(ms) {
