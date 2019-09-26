@@ -8,6 +8,8 @@ define(function () {
         addRoute: "/api/route/create/",
         getRouteInfo: "/api/route/",
         closeRoute: "/api/route/close/",
+        openRoute: "/api/route/open/",
+        addRoutePoint: "/api/route/add_point/",
 
         mapBoxDomain: "https://api.mapbox.com/directions/v5/",
     };

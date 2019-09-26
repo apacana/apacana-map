@@ -1,6 +1,7 @@
 checkBoxOpen = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="21" height="21"><path fill="none" d="M0 0h24v24H0z"/><path d="M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm1 2v14h14V5H5zm6.003 11L6.76 11.757l1.414-1.414 2.829 2.829 5.656-5.657 1.415 1.414L11.003 16z" fill="#000"/></svg>`;
 checkBoxClose = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="21" height="21"><path fill="none" d="M0 0h24v24H0z"/><path d="M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm1 2v14h14V5H5z" fill="#000"/></svg>`;
 routePointMap = new Map();
+routeDirectionMap = new Map();
 
 addFirstStroke = function (stroke_name = '') {
     fetch(requestConfig.domain + requestConfig.addStroke, {
@@ -159,7 +160,7 @@ createRouteHtml = function (route) {
     return pane
 };
 
-getDirection = function (start_lon, start_lat, end_lon, end_lat, route_token, point_token, profile = 'driving-traffic') {
+getDirection = function (start_lon, start_lat, end_lon, end_lat, route_token, point_token, route_color, profile = 'driving-traffic') {
     let url = requestConfig.mapBoxDomain + 'mapbox/' + profile + '/' + start_lon + '%2C' + start_lat + '%3B' + end_lon + '%2C' + end_lat + '.json?access_token=pk.eyJ1IjoiYWFyb25saWRtYW4iLCJhIjoiNTVucTd0TSJ9.wVh5WkYXWJSBgwnScLupiQ&geometries=geojson&overview=full';
     fetch(url, {
         method: 'GET',
@@ -175,10 +176,12 @@ getDirection = function (start_lon, start_lat, end_lon, end_lat, route_token, po
                 let coordinates = changeLonLat(data.routes[0].geometry.coordinates);
 
                 // print to map
-                let polyline = L.polyline(coordinates, {color: 'red'}); // 5eb0cc
+                let polyline = L.polyline(coordinates, {color: route_color}); // 5eb0cc
                 polyline.addTo(map);
-                addRoutePointRequest(route_token, point_token, JSON.stringify(data.routes[0]));
+                addPolylineCache(route_token, polyline);
+                direction = JSON.stringify(data.routes[0]);
             }
+            addRoutePointRequest(route_token, point_token, direction);
         }
     }).catch(function(e) {
         console.log("getDirection error", e);
@@ -253,6 +256,7 @@ routeInfoClick = function (route_token) {
 
 openRoute = function (route_token) {
     if (typeof(routeInfoMap.get(route_token)) === 'undefined') {
+        getRoute(route_token);
     } else {
         let id = `route_info_list_${route_token}`;
         if (document.getElementById(id)) {
@@ -260,10 +264,36 @@ openRoute = function (route_token) {
         } else {
             console.log("getElementById failed");
         }
+        // load polyline
+        if (typeof(routeDirectionMap.get(route_token)) === 'undefined') {
+        } else {
+            let polylineList = routeDirectionMap.get(route_token);
+            for (let polyline of polylineList) {
+                polyline.addTo(map);
+            }
+        }
     }
 
     document.getElementById(`route_check_box_${route_token}`).innerHTML = checkBoxOpen;
-    getRoute(route_token);
+    // make close route request
+    makeOpenRouteRequest(route_token);
+};
+
+makeOpenRouteRequest = function (route_token) {
+    fetch(requestConfig.domain + requestConfig.openRoute, {
+        credentials: 'include',
+        method: 'POST',
+        body: '{"route_token": "' + route_token + '"}',
+    }).then(response => {
+        return response.json();
+    }).then(data => {
+        console.log(data);
+        if (data.code !== 0) {
+            console.log("makeOpenRoute failed, code:", data.code);
+        }
+    }).catch(function(e) {
+        console.log("makeOpenRoute error");
+    });
 };
 
 closeRoute = function (route_token) {
@@ -274,6 +304,15 @@ closeRoute = function (route_token) {
     } else {
         console.log("getElementById failed");
     }
+    // remove polyline
+    if (typeof(routeDirectionMap.get(route_token)) === 'undefined') {
+    } else {
+        let polylineList = routeDirectionMap.get(route_token);
+        for (let polyline of polylineList) {
+            polyline.removeFrom(map);
+        }
+    }
+
     document.getElementById(`route_check_box_${route_token}`).innerHTML = checkBoxClose;
 
     // 更新route status
@@ -320,10 +359,15 @@ updateRouteInfoList = async function (route_info) {
     let pane = "";
     let pointInfoList = [];
     for(let point of route_info["route_point"]) {
+        if (point["direction"] !== "") {
+            let polyline = printDirection(point["direction"], route_info["route_color"]);
+            polyline.addTo(map);
+            addPolylineCache(route_info["route_token"], polyline);
+        }
         pane += createPointHtml(point);
         pointInfoList.push(point);
     }
-    pane += addRoutePointLogo(route_info["route_token"]);
+    pane += addRoutePointLogo(route_info["route_token"], route_info["route_color"]);
     routeInfoMap.set(route_info["route_token"], pane);
     routePointMap.set(route_info["route_token"], pointInfoList);
     let id = `route_info_list_${route_info["route_token"]}`;
@@ -334,29 +378,41 @@ updateRouteInfoList = async function (route_info) {
     }
 };
 
-addRoutePointLogo = function (route_token) {
-    return `<div id="add_route_point_info_${route_token}" style="cursor: pointer; font: 400 13px Roboto, Arial, sans-serif; color: #777777; width: 65px;" onclick="addRoutePointPrepare('${route_token}')">
+addPolylineCache = function (route_token, polyline) {
+    let polylineList = [];
+    if (typeof(routeDirectionMap.get(route_token)) === 'undefined') {
+    } else {
+        polylineList = routeDirectionMap.get(route_token);
+    }
+
+    polylineList.push(polyline);
+    routeDirectionMap.set(route_token, polylineList);
+};
+
+addRoutePointLogo = function (route_token, route_color = '') {
+    return `<div id="add_route_point_info_${route_token}" style="cursor: pointer; font: 400 13px Roboto, Arial, sans-serif; color: #777777; width: 65px;" onclick="addRoutePointPrepare('${route_token}', '${route_color}')">
                     <div>添加路线点</div>
             </div>`;
 };
 
-addRoutePointPrepare = function (route_token) {
+addRoutePointPrepare = function (route_token, route_color) {
     if (addRoutePointToken === route_token) {
         // close add route point switch
         removeRoutePointSelect(route_token);
     } else if (addRoutePointToken === '') {
-        addRoutePointSelect(route_token);
+        addRoutePointSelect(route_token, route_color);
     } else {
         removeRoutePointSelect(addRoutePointToken);
-        addRoutePointSelect(route_token);
+        addRoutePointSelect(route_token, route_color);
     }
 };
 
-addRoutePointSelect = function (route_token) {
+addRoutePointSelect = function (route_token, route_color) {
     // 添加选中标示
     document.getElementById(`add_route_point_info_${route_token}`).style.color = '#444444';
     addRoutePointSwitch = true;
     addRoutePointToken = route_token;
+    addRoutePointColor = route_color;
 };
 
 removeRoutePointSelect = function (route_token) {
@@ -366,7 +422,7 @@ removeRoutePointSelect = function (route_token) {
     addRoutePointToken = '';
 };
 
-addRoutePoint = function (route_token, point) {
+addRoutePoint = function (route_token, point, route_color) {
     if (typeof(routePointMap.get(route_token)) === 'undefined') {
         console.log("routePointMap error");
     }
@@ -375,7 +431,7 @@ addRoutePoint = function (route_token, point) {
         // 生成路线
         let nearPoint = routePoint[routePoint.length - 1];
         let [lon, lat] = nearPoint["center"].split(",");
-        getDirection(lon, lat, point._latlng["lng"], point._latlng["lat"], route_token, point["options"]["point_token"]);
+        getDirection(lon, lat, point._latlng["lng"], point._latlng["lat"], route_token, point["options"]["point_token"], route_color);
     } else {
         addRoutePointRequest(route_token, point["options"]["point_token"]);
     }
@@ -386,7 +442,7 @@ addRoutePoint = function (route_token, point) {
     for(let point of routePoint) {
         pane += createPointHtml(point);
     }
-    pane += addRoutePointLogo(route_token);
+    pane += addRoutePointLogo(route_token, route_color);
     routeInfoMap.set(route_token, pane);
     routePointMap.set(route_token, routePoint);
     let id = `route_info_list_${route_token}`;
@@ -398,8 +454,33 @@ addRoutePoint = function (route_token, point) {
 };
 
 addRoutePointRequest = function (route_token, point_token, direction = '') {
-    // todo addRoutePointRequest
-    console.log("make addRoutePointRequest", route_token, point_token, direction)
+    // addRoutePointRequest
+    fetch(requestConfig.domain + requestConfig.addRoutePoint, {
+        credentials: 'include',
+        method: 'POST',
+        body: '{"route_token": "' + route_token + '",' +
+            '"point_token": "' + point_token + '",' +
+            '"direction": ' + JSON.stringify(direction) + '}',
+    }).then(response => {
+        return response.json();
+    }).then(data => {
+        console.log(data);
+        if (data.code !== 0) {
+            console.log("addRoutePoint failed, code:", data.code);
+        } else {
+            // 更新时间
+            updateStrokeUpdateTime(data.data["update_time"]);
+        }
+    }).catch(function(e) {
+        console.log("addRoutePoint error", e);
+    });
+};
+
+printDirection = function (direction, color) {
+    direction = JSON.parse(direction);
+    let coordinates = changeLonLat(direction.geometry.coordinates);
+    let polyline = L.polyline(coordinates, {color: color}); // 5eb0cc
+    return polyline;
 };
 
 function sleep(ms) {

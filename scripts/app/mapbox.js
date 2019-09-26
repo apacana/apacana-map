@@ -7,6 +7,7 @@ popupOption = {
 };
 addRoutePointSwitch = false;
 addRoutePointToken = '';
+addRoutePointColor = '';
 
 let initSearchMarket = function (mapBox) {
     searchMarkets = [0,0,0,0,0].map(() => {
@@ -167,7 +168,7 @@ selectUserMarket = function(point_id, point_type) {
         if (point["options"]["point_id"] === point_id && point["options"]["point_type"] === point_type) {
             if (addRoutePointSwitch === true) {
                 console.log("point:", point._latlng);
-                addRoutePoint(addRoutePointToken, point);
+                addRoutePoint(addRoutePointToken, point, addRoutePointColor);
                 removeRoutePointSelect(addRoutePointToken);
             }
             point.openPopup();
