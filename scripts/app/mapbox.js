@@ -219,17 +219,23 @@ let mapMouseControl = function(mapBox) {
         // 单击事件
         map.on('click', function (e) {
             closeSearchResult();
-            console.log("map click");
-        });
-        // 右键事件
-        map.on('contextmenu', function (e) {
-            closeSearchResult();
-            console.log("map contextmenu");
+            document.getElementById('featurelist-pane-hotel').innerHTML = '';
         });
         // 地图拖动事件
         map.on('dragstart', function (e) {
-            closeSearchResult();
-            console.log("map dragstart");
+            // closeSearchResult();
+        });
+        // 气泡点击事件
+        map.on('popupopen', function(e) {
+            var marker = e.popup._source;
+            console.log("popupopen", marker);
+            // todo hotel marker show
+            document.getElementById('featurelist-pane-hotel').innerHTML = marker._latlng;
+        });
+        // 气泡关闭事件
+        map.on('popupclose', function(e) {
+            console.log("popupclose");
+            document.getElementById('featurelist-pane-hotel').innerHTML = '';
         });
     }
 };

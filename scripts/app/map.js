@@ -4,7 +4,13 @@ let getMap = function(id) {
         // 华盛顿38.90378612315598,-77.04753807398001
         center: [39.908898,116.394293],
         zoom: 13,
-        zoomControl: false
+        zoomControl: false,
+        contextmenu: true,
+        contextmenuWidth: 140,
+        contextmenuItems: [{
+            text: '查询附近的酒店',
+            callback: searchNearHotel
+        }]
     }).setMaxBounds([[-90, -180], [90, 180]]);
 
     // 显示谷歌地图
@@ -26,6 +32,8 @@ let getMap = function(id) {
 
 define(function (require) {
     require("leaflet-provider");
+    require("leaflet-contextmenu");
+    require("./hotel");
 
     return {
         getMap: getMap
