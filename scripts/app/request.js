@@ -10,6 +10,8 @@ define(function () {
         closeRoute: "/api/route/close/",
         openRoute: "/api/route/open/",
         addRoutePoint: "/api/route/add_point/",
+        searchHotel: "/api/hotel/agoda/search/",
+        getHotel: "/api/hotel/agoda/get/",
 
         mapBoxDomain: "https://api.mapbox.com/directions/v5/",
     };

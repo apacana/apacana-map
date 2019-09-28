@@ -10,6 +10,9 @@ let getMap = function(id) {
         contextmenuItems: [{
             text: '查询附近的酒店',
             callback: searchNearHotel
+        }, {
+            text: '清空酒店搜索结果',
+            callback: emptyHotel
         }]
     }).setMaxBounds([[-90, -180], [90, 180]]);
 

@@ -62,7 +62,7 @@ let addGeoControl = function (mapBox, injects) {
                                     <i class="leaflet-info-window-icon icon-loc"></i>
                                     ${lat.toFixed(6)}, ${lon.toFixed(6)}
                                 </p>
-                                <a class="leaflet-info-window-btn" onclick="addPoint('${index}', '${item.id}', '${item.escp_text}', '${item.escp_place_name}', '${item.center}');">
+                                <a class="leaflet-info-window-btn" style="cursor: pointer" onclick="addPoint('${index}', '${item.id}', '${item.escp_text}', '${item.escp_place_name}', '${item.center}');">
                                     <i class="leaflet-info-window-icon icon-add"></i>
                                     添加到点集
                                 </>
@@ -116,9 +116,16 @@ let addPoint = function(index, point_id, text, place_name, center, point_type = 
             if (typeof(userInfoMem["strokes_info"]) == "undefined") {
                 userInfoMem.strokes_info = {};
                 userInfoMem.strokes_info.default_stroke = createStrokeVar(data.data["stroke_info"]["stroke_name"], data.data["stroke_info"]["stroke_token"], data.data["stroke_info"]["update_time"]);
-            } else {
-                userInfoMem.strokes_info.default_stroke.update_time = data.data["stroke_info"]["update_time"];
+                userInfoMem.strokes_info.default_stroke.point_list.push(packPointInfo(text, place_name, point_id, point_type, data.data["point_info"]["point_token"], center));
+                let pane = bindStrokeInfo(userInfoMem.strokes_info);
+                if (document.getElementById('featurelist-pane')) {
+                    document.getElementById('featurelist-pane').innerHTML = pane;
+                } else {
+                    console.log("getElementById featurelist-pane failed");
+                }
+                return
             }
+            userInfoMem.strokes_info.default_stroke.update_time = data.data["stroke_info"]["update_time"];
             userInfoMem.strokes_info.default_stroke.point_list.push(packPointInfo(text, place_name, point_id, point_type, data.data["point_info"]["point_token"], center));
             // console.log("userInfoMem[\"strokes_info\"][\"default_stroke\"]:",userInfoMem["strokes_info"]["default_stroke"]);
             // 刷新point_list
@@ -227,14 +234,13 @@ let mapMouseControl = function(mapBox) {
         });
         // 气泡点击事件
         map.on('popupopen', function(e) {
-            var marker = e.popup._source;
-            console.log("popupopen", marker);
-            // todo hotel marker show
-            document.getElementById('featurelist-pane-hotel').innerHTML = marker._latlng;
+            let marker = e.popup._source;
+            if (marker["options"]["point_type"] === 'agoda_hotel') {
+                showHotelInfo(marker);
+            }
         });
         // 气泡关闭事件
         map.on('popupclose', function(e) {
-            console.log("popupclose");
             document.getElementById('featurelist-pane-hotel').innerHTML = '';
         });
     }

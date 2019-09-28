@@ -417,3 +417,67 @@ time, mark, audio, video {
     border-bottom: 1px solid #ccc;
     margin: 5px 0;
 }
+
+.section-hero-header-title {
+    font-size: 13px;
+}
+
+.section-hero-header-title-description {
+    padding: 16px 24px 16px;
+}
+
+.GLOBAL__gm2-headline-5 {
+    font-family: 'Google Sans',Roboto,'Noto Sans Devanagari UI', 'Noto Sans Bengali UI', 'Noto Sans Telugu UI', 'Noto Sans Tamil UI', 'Noto Sans Gujarati UI', 'Noto Sans Kannada UI', 'Noto Sans Malayalam UI', 'Noto Sans Gurmukhi UI',  Arial,sans-serif;
+    font-size: 1.375rem;
+    font-weight: 400;
+    line-height: 1.75rem;
+}
+
+.section-hero-header-title-subtitle {
+    font-family: Roboto, 'Noto Sans Devanagari UI', 'Noto Sans Bengali UI', 'Noto Sans Telugu UI', 'Noto Sans Tamil UI', 'Noto Sans Gujarati UI', 'Noto Sans Kannada UI', 'Noto Sans Malayalam UI', 'Noto Sans Gurmukhi UI', Arial, sans-serif;
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.section-hero-header-title-description-container {
+    color: rgba(0, 0, 0, 0.54);
+}
+
+.section-star-array {
+    padding-left: 26px;
+    padding-right: 4px;
+    display: inline-block;
+    height: 14px;
+}
+
+.section-star {
+    background-size: 14px 14px;
+    background-image: url('//maps.gstatic.com/consumer/images/icons/2x/ic_star_rate_14.png');
+    vertical-align: top;
+    width: 14px;
+    height: 13px;
+    display: inline-block;
+}
+
+.section-star-empty {
+    background-image: url('//maps.gstatic.com/consumer/images/icons/2x/ic_star_rate_empty_14.png');
+}
+
+.section-star-half {
+    background-image: url('//maps.gstatic.com/consumer/images/icons/2x/ic_star_rate_half_14.png');
+}
+
+.section-subheader {
+    flex: none;
+    align-items: center;
+    padding: 16px 24px;
+}
+
+.GLOBAL__gm2-subtitle-alt-1 {
+    letter-spacing: 0.00625em;
+    font-family: 'Google Sans',Roboto,'Noto Sans Devanagari UI', 'Noto Sans Bengali UI', 'Noto Sans Telugu UI', 'Noto Sans Tamil UI', 'Noto Sans Gujarati UI', 'Noto Sans Kannada UI', 'Noto Sans Malayalam UI', 'Noto Sans Gurmukhi UI',  Arial,sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.5rem;
+    flex: auto;
+}
