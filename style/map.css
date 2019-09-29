@@ -481,3 +481,14 @@ time, mark, audio, video {
     line-height: 1.5rem;
     flex: auto;
 }
+
+.photo-wall {
+    padding: 0 24px;
+    overflow: hidden;
+    flex: none;
+}
+
+.liubai {
+    height: 4px;
+    flex: none;
+}

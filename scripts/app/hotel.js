@@ -83,7 +83,7 @@ setHotelMarket = function (hotel) {
 };
 
 packHotelSummary = function (hotel) {
-    return `星级: ${hotel["starRating"]}, 评分: ${hotel["reviewScore"]}, 价格: ${hotel["dailyRate"]} ${hotel["currency"]} <a style="color: #0052cc">点击预定</a>`;
+    return `星级: ${hotel["starRating"]}, 评分: ${hotel["reviewScore"]}, 价格: ${hotel["dailyRate"]} ¥ <a style="color: #0052cc">点击预定</a>`;
 };
 
 hotelMarketPopup = function(text, place_name, lat, lon, url = '') {
@@ -140,7 +140,7 @@ function getClientSize() {
 packHotelInfo = function (hotel, hotelInfo) {
     console.log(hotel, hotelInfo);
     let size = getClientSize();
-    let pane = `<div style="max-height: ${size.height}px; overflow-x: hidden; overflow-y: auto; position: absolute; background-color: #FFFFFF;">
+    let pane = `<div style="max-height: ${size.height}px; overflow-x: hidden; overflow-y: auto; position: absolute; background-color: #FFFFFF; width: 408px">
                 <div>
                     <div style="display: block; width: 100%; height: 240px;">
                         <button style=" width: 100%; height: 100%; cursor: pointer; position: relative" onclick="window.open('${hotel["landingURL"]}', '_blank')">
@@ -249,8 +249,54 @@ packHotelInfo = function (hotel, hotelInfo) {
                         </div>
                         <div style="flex: none; border-bottom: 1px solid #e6e6e6; height: 0"></div>
                         <div class="section-subheader">
+                            <h2 class="GLOBAL__gm2-subtitle-alt-1">价格</h2>
+                        </div>
+                        <div style="flex: none; border-bottom: 1px solid #e6e6e6; height: 0"></div>
+                        <div class="section-subheader">
                             <h2 class="GLOBAL__gm2-subtitle-alt-1">简介</h2>
                             <div style="margin-top: 3px; margin-bottom: 0;">${hotelInfo["over_view"]}</div>
+                        </div>
+                        <div style="flex: none; border-bottom: 1px solid #e6e6e6; height: 0"></div>
+                        <div class="section-subheader">
+                            <h2 class="GLOBAL__gm2-subtitle-alt-1">照片</h2>
+                        </div>
+                        <div class="photo-wall" style="overflow-x: auto; overflow-y: hidden; min-height: 100px; display: flex;">
+                            <div style="display: inline-block; margin-bottom: 16px; margin-right: 8px; height: 120px">
+                                <button style="border: 0; padding: 0; position: relative; border-radius: 8px; overflow: hidden; width: 115px; height: 120px; cursor: pointer;" onclick="window.open('${hotelInfo["photo2"]}', '_blank')">
+                                    <div style="height: 120px; width: 115px; position: relative; overflow: hidden; direction: ltr">
+                                        <img src="${hotelInfo["photo2"]}" style="position: absolute; top: 50%; left: 50%; width: 115px; height: 121px; transform: translateY(-50%) translateX(-50%); display: block;">
+                                    </div>
+                                </button>
+                            </div>
+                            <div style="display: inline-block; margin-bottom: 16px; margin-right: 8px; height: 120px">
+                                <button style="border: 0; padding: 0; position: relative; border-radius: 8px; overflow: hidden; width: 115px; height: 120px; cursor: pointer;" onclick="window.open('${hotelInfo["photo3"]}', '_blank')">
+                                    <div style="height: 120px; width: 115px; position: relative; overflow: hidden; direction: ltr">
+                                        <img src="${hotelInfo["photo3"]}" style="position: absolute; top: 50%; left: 50%; width: 115px; height: 121px; transform: translateY(-50%) translateX(-50%); display: block;">
+                                    </div>
+                                </button>
+                            </div>
+                            <div style="display: inline-block; margin-bottom: 16px; margin-right: 8px; height: 120px">
+                                <button style="border: 0; padding: 0; position: relative; border-radius: 8px; overflow: hidden; width: 115px; height: 120px; cursor: pointer;" onclick="window.open('${hotelInfo["photo4"]}', '_blank')">
+                                    <div style="height: 120px; width: 115px; position: relative; overflow: hidden; direction: ltr">
+                                        <img src="${hotelInfo["photo4"]}" style="position: absolute; top: 50%; left: 50%; width: 115px; height: 121px; transform: translateY(-50%) translateX(-50%); display: block;">
+                                    </div>
+                                </button>
+                            </div>
+                            <div style="display: inline-block; margin-bottom: 16px; margin-right: 0; padding-right: 24px; height: 120px">
+                                <button style="border: 0; padding: 0; position: relative; border-radius: 8px; overflow: hidden; width: 115px; height: 120px; cursor: pointer;" onclick="window.open('${hotelInfo["photo5"]}', '_blank')">
+                                    <div style="height: 120px; width: 115px; position: relative; overflow: hidden; direction: ltr">
+                                        <img src="${hotelInfo["photo5"]}" style="position: absolute; top: 50%; left: 50%; width: 115px; height: 121px; transform: translateY(-50%) translateX(-50%); display: block;">
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="liubai"></div>
+                        <div style="flex: none; border-bottom: 1px solid #e6e6e6; height: 0"></div>
+                        <div class="section-subheader">
+                            <h2 class="GLOBAL__gm2-subtitle-alt-1">附近酒店</h2>
+                        </div>
+                        <div class="photo-wall" style="overflow-x: auto; overflow-y: hidden; min-height: 100px; display: flex;">
+                            hello world
                         </div>
                     </div>
                 </div></div>`;
