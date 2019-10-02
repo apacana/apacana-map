@@ -12,6 +12,7 @@ define(function () {
         addRoutePoint: "/api/route/add_point/",
         searchHotel: "/api/hotel/agoda/search/",
         getHotel: "/api/hotel/agoda/get/",
+        hotelBooking: "/api/hotel/agoda/booking/",
 
         mapBoxDomain: "https://api.mapbox.com/directions/v5/",
     };

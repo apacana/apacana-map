@@ -1,21 +1,52 @@
-// 留白
 hotelMarker = [];
+hotelNameMarker = [];
 hotelInfos = new Map();
+hotelPopupOption = {
+    autoPanPaddingTopLeft: L.point(350, 80),
+    autoPanPaddingBottomRight: L.point(100, 100),
+};
 
 emptyHotel = function (e) {
     for (let hotel of hotelMarker) {
         hotel.removeFrom(map);
     }
+    for (let hotelName of hotelNameMarker) {
+        hotelName.removeFrom(map);
+    }
     hotelMarker = [];
+    hotelNameMarker = [];
+};
+
+Date.prototype.format = function (fmt) {
+    let o = {
+        "M+": this.getMonth() + 1, //月份
+        "d+": this.getDate(), //日
+        "h+": this.getHours(), //小时
+        "m+": this.getMinutes(), //分
+        "s+": this.getSeconds(), //秒
+        "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+        "S": this.getMilliseconds() //毫秒
+    };
+    if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+    for (var k in o)
+        if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+    return fmt;
 };
 
 searchNearHotel = function (e) {
     console.log(e.latlng);
+    let nowTime = new Date();
+    nowTime.setDate(nowTime.getDate() + 1);
+    let checkInTime = nowTime.format("yyyy-MM-dd");
+    nowTime.setDate(nowTime.getDate() + 1);
+    let checkOutTime = nowTime.format("yyyy-MM-dd");
     fetch(requestConfig.domain + requestConfig.searchHotel, {
         credentials: 'include',
         method: 'POST',
         body: '{"latitude": "' + e.latlng.lat + '",' +
-            '"longitude": "' + e.latlng.lng + '"}',
+            '"longitude": "' + e.latlng.lng + '",' +
+            '"check_in_data": "' + checkInTime + '",' +
+            '"check_out_data": "' + checkOutTime + '"}',
     }).then(response => {
         return response.json();
     }).then(data => {
@@ -27,6 +58,8 @@ searchNearHotel = function (e) {
                 let allowID = [];
                 for (let hotel of result["result"]["results"]) {
                     if (allowHotel(hotel)) {
+                        hotel["check_in_data"] = checkInTime;
+                        hotel["check_out_data"] = checkOutTime;
                         setHotelMarket(hotel);
                         allowID.push(hotel["hotelId"]);
                     }
@@ -78,12 +111,24 @@ setHotelMarket = function (hotel) {
     let lon = parseFloat(hotel["longitude"]);
     marker.addTo(map);
     marker.setLatLng([lat, lon]);
-    marker.bindPopup(hotelMarketPopup(hotel["hotelName"], packHotelSummary(hotel), lat, lon, hotel["landingURL"]), popupOption);
-    hotelMarker.push(marker)
+    marker.bindPopup(hotelMarketPopup(hotel["hotelName"], packHotelSummary(hotel), lat, lon, hotel["landingURL"]), hotelPopupOption);
+    hotelMarker.push(marker);
+
+    let nameMarker = L.marker([lat, lon], {icon: textIcon(`${hotel["hotelName"]} ¥${hotel["dailyRate"]}`), point_id: hotel["hotelId"], point_type: "agoda_hotel"});
+    nameMarker.addTo(map);
+    hotelNameMarker.push(nameMarker);
+};
+
+textIcon = function (htmlText) {
+    return L.divIcon({
+        className: 'hotel-label',
+        html: htmlText,
+        iconSize: [80, 0]
+    });
 };
 
 packHotelSummary = function (hotel) {
-    return `星级: ${hotel["starRating"]}, 评分: ${hotel["reviewScore"]}, 价格: ${hotel["dailyRate"]} ¥ <a style="color: #0052cc">点击预定</a>`;
+    return `星级: ${hotel["starRating"]}, 评分: ${hotel["reviewScore"]}, 价格: ${hotel["dailyRate"]}¥ <a style="color: #0052cc">点击预定</a>`;
 };
 
 hotelMarketPopup = function(text, place_name, lat, lon, url = '') {
@@ -143,7 +188,7 @@ packHotelInfo = function (hotel, hotelInfo) {
     let pane = `<div style="max-height: ${size.height}px; overflow-x: hidden; overflow-y: auto; position: absolute; background-color: #FFFFFF; width: 408px">
                 <div>
                     <div style="display: block; width: 100%; height: 240px;">
-                        <button style=" width: 100%; height: 100%; cursor: pointer; position: relative" onclick="window.open('${hotel["landingURL"]}', '_blank')">
+                        <button style=" width: 100%; height: 100%; cursor: pointer; position: relative" onclick="window.open('${hotel["imageURL"]}', '_blank')">
                             <img src="${hotel["imageURL"]}" style="position: absolute; top: 50%;left: 50%;width: 407px;height: 240px;-webkit-transform: translateY(-50%) translateX(-50%);transform: translateY(-50%) translateX(-50%);">
                         </button>
                     </div>
@@ -248,8 +293,31 @@ packHotelInfo = function (hotel, hotelInfo) {
                             </div>
                         </div>
                         <div style="flex: none; border-bottom: 1px solid #e6e6e6; height: 0"></div>
-                        <div class="section-subheader">
+                        <div class="section-subheader" style="padding-bottom: 8px;">
                             <h2 class="GLOBAL__gm2-subtitle-alt-1">价格</h2>
+                        </div>
+                        <div style="padding-bottom: 6px; display: flex; flex-direction: row">
+                            <div class="section-date-range-selection-container">
+                                <div class="GLOBAL__gm2-caption section-date-range-combined-label" style="margin-bottom: 2px">入住/退房</div>
+                                <div class="section-date-range-selection-control">
+                                    <div class="section-date-range-group section-date-range-first">
+                                        <input type="text" class="GLOBAL__gm2-body-2" placeholder="${hotel["check_in_data"]} - ${hotel["check_out_data"]}" id="check-data" style="text-align:center; border: none; height: 36px; width: 298px; margin-top: 6px; margin-left: 1px;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="section-occupancy-selection">
+                                <span class="section-occupancy-selection-person-icon"></span>
+                                <button class="GLOBAL__gm2-hairline-border GLOBAL__gm2-body-2 section-occupancy-selection-dropdown" style="width: 48px; height: 48px; text-align:center;">2</button>
+                            </div>
+                        </div>
+                        <div class="section-hotel-prices-container">
+                            <div class="section-hotel-prices-section">
+                                <div class="section-hotel-prices-booking-container" id="section-hotel-prices-booking-container">
+                                    <div class="section-hotel-prices-booking-part" id="agoda_hotel_${hotel["hotelId"]}">`;
+    pane +=  setAgodaHotelBooking(hotel);
+    pane += `</div>
+                                </div>
+                            </div>
                         </div>
                         <div style="flex: none; border-bottom: 1px solid #e6e6e6; height: 0"></div>
                         <div class="section-subheader">
@@ -292,14 +360,29 @@ packHotelInfo = function (hotel, hotelInfo) {
                         </div>
                         <div class="liubai"></div>
                         <div style="flex: none; border-bottom: 1px solid #e6e6e6; height: 0"></div>
-                        <div class="section-subheader">
-                            <h2 class="GLOBAL__gm2-subtitle-alt-1">附近酒店</h2>
-                        </div>
-                        <div class="photo-wall" style="overflow-x: auto; overflow-y: hidden; min-height: 100px; display: flex;">
-                            hello world
-                        </div>
                     </div>
                 </div></div>`;
+    return pane
+};
+
+setAgodaHotelBooking = function(hotel) {
+    let pane = `<a href="${hotel["landingURL"]}" target="view_window" class="pVMtpLzfYWO__rate-row" style="color: #4285F4; text-decoration: none; outline: none;">
+        <div style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis; display: -webkit-flex; display: -ms-flexbox; display: flex; overflow: hidden; -moz-align-items: center; -webkit-align-items: center; align-items: center;">
+        <img src="//www.gstatic.com/travel-hotels/branding/icon_100337601.png" class="pVMtpLzfYWO__partner-icon">
+        <div class="pVMtpLzfYWO__partner-name">Agoda</div>
+        <button class="pVMtpLzfYWO__nightly-price-button">`;
+    if (hotel["includeBreakfast"] === true) {
+        pane += `<div style="color: #66be5b; border: 1px solid; border-color: #66be5b; margin-right: 3px; padding: 1px 3px">早餐</div>`
+    }
+    if (hotel["freeWifi"] === true) {
+        pane += `<div style="color: #66be5b; border: 1px solid; border-color: #66be5b; margin-right: 3px; padding: 1px 3px">wifi</div>`
+    }
+    pane += `
+                                                        <div style="font-weight: 500;color: #333; font-size: 14px; text-decoration: none; margin-left: 6px;">¥ ${hotel["dailyRate"]}</div>
+                                                        <span class="pVMtpLzfYWO__click-through-icon"></span>
+                                                    </button>
+                                                </div>
+                                            </a>`;
     return pane
 };
 
@@ -307,4 +390,54 @@ showHotelInfo = function (marker) {
     let hotelInfo = hotelInfos.get(marker["options"]["point_id"]);
     pane = packHotelInfo(marker["options"]["hotel"], hotelInfo);
     document.getElementById('featurelist-pane-hotel').innerHTML = pane;
+    laydate.render({
+        elem: '#check-data'
+        ,min: 0
+        ,range: true
+        ,change: function(value, date, endDate){
+            let [checkInTime, checkOutTime] = value.split(" - ");
+            searchHotelPrice(marker, checkInTime, checkOutTime);
+        }
+    });
+};
+
+searchHotelPrice = function (marker, checkInTime, checkOutTime) {
+    fetch(requestConfig.domain + requestConfig.hotelBooking, {
+        credentials: 'include',
+        method: 'POST',
+        body: '{"hotel_ids": [' + marker["options"]["point_id"] + '],' +
+            '"check_in_date": "' + checkInTime + '",' +
+            '"check_out_date": "' + checkOutTime + '"}',
+    }).then(response => {
+        return response.json();
+    }).then(data => {
+        console.log(data);
+        if (data.code !== 0) {
+            console.log("hotelBooking failed:", data.code);
+        } else {
+            let result = JSON.parse(data.data);
+            for (let hotel of result["results"]) {
+                if (hotel["hotelId"] === marker["options"]["point_id"]) {
+                    console.log(hotel, marker["options"]);
+                    marker["options"]["hotel"]["check_in_data"] = checkInTime;
+                    marker["options"]["hotel"]["check_out_data"] = checkOutTime;
+                    marker["options"]["hotel"]["dailyRate"] = hotel["dailyRate"];
+                    marker["options"]["hotel"]["includeBreakfast"] = hotel["includeBreakfast"];
+                    marker["options"]["hotel"]["freeWifi"] = hotel["freeWifi"];
+                    marker["options"]["hotel"]["landingURL"] = hotel["landingURL"];
+                    marker.setPopupContent(hotelMarketPopup(marker["options"]["hotel"]["hotelName"], packHotelSummary(marker["options"]["hotel"]), marker["options"]["hotel"]["latitude"], marker["options"]["hotel"]["longitude"], marker["options"]["hotel"]["landingURL"]), popupOption);
+                    let pane = setAgodaHotelBooking(marker["options"]["hotel"]);
+                    document.getElementById(`agoda_hotel_${marker["options"]["point_id"]}`).innerHTML = pane;
+                    for (let hotelName of hotelNameMarker) {
+                        if (hotelName["options"]["point_id"] === marker["options"]["point_id"]) {
+                            hotelName.setIcon(textIcon(`${hotel["hotelName"]} ¥${hotel["dailyRate"]}`));
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }).catch(function(e) {
+        console.log("hotelBooking error:", e);
+    });
 };

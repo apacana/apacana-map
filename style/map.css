@@ -492,3 +492,175 @@ time, mark, audio, video {
     height: 4px;
     flex: none;
 }
+
+.section-date-range-selection-container {
+    margin: 0 8px 0 24px;
+    position: relative;
+    font-size: 13px;
+    display: block;
+    flex: 1;
+}
+
+.GLOBAL__gm2-caption section-date-range-combined-label {
+    letter-spacing: 0.025em;
+    font-family: Roboto,'Noto Sans Devanagari UI', 'Noto Sans Bengali UI', 'Noto Sans Telugu UI', 'Noto Sans Tamil UI', 'Noto Sans Gujarati UI', 'Noto Sans Kannada UI', 'Noto Sans Malayalam UI', 'Noto Sans Gurmukhi UI', Arial,sans-serif;
+    font-size: .75rem;
+    font-weight: 400;
+    line-height: 1rem;
+    color: #70757a;
+}
+
+.section-date-range-selection-control {
+    display: flex;
+    border-radius: 4px;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.12) inset;
+}
+
+.section-date-range-group {
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    position: relative;
+    border-radius: 4px;
+    -webkit-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    height: 48px;
+}
+
+.section-date-range-first {
+    margin-right: -1px;
+}
+
+.section-occupancy-selection {
+    -webkit-flex: 0 1 auto;
+    -ms-flex: 0 1 auto;
+    flex: 0 1 auto;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: column;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    -ms-flex-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+    margin-right: 24px;
+}
+
+.section-occupancy-selection-dropdown {
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 11px 2px 11px 16px;
+}
+
+.GLOBAL__gm2-hairline-border {
+    border: 1px solid #dadce0;
+}
+
+.GLOBAL__gm2-body-2 {
+    letter-spacing: 0.01428571em;
+    font-family: Roboto,'Noto Sans Devanagari UI', 'Noto Sans Bengali UI', 'Noto Sans Telugu UI', 'Noto Sans Tamil UI', 'Noto Sans Gujarati UI', 'Noto Sans Kannada UI', 'Noto Sans Malayalam UI', 'Noto Sans Gurmukhi UI', Arial,sans-serif;
+    font-size: .875rem;
+    font-weight: 400;
+    line-height: 1.25rem;
+}
+
+.section-occupancy-selection-person-icon {
+    background: url(//www.gstatic.com/images/icons/material/system_gm/1x/person_gm_grey_18dp.png) no-repeat center;
+    height: 16px;
+    width: 16px;
+    background-size: 16px;
+    margin-bottom: 4px;
+    display: inline-block;
+    flex: none;
+}
+
+.section-hotel-prices-container {
+    flex: none;
+    font-size: 13px;
+    padding-bottom: 20px;
+}
+
+.section-hotel-prices-section {
+    position: relative;
+}
+
+.section-hotel-prices-booking-container {
+    margin: 0 24px;
+}
+
+.section-hotel-prices-booking-part {
+    border-bottom: 1px solid #ebebeb;
+}
+
+.pVMtpLzfYWO__rate-row {
+    cursor: pointer;
+    padding: 4px 0;
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    font: inherit;
+    list-style: none;
+    margin: 0;
+    overflow: visible;
+    vertical-align: baseline;
+}
+
+.pVMtpLzfYWO__partner-icon {
+    width: 22px;
+    height: 22px;
+    vertical-align: middle;
+    padding-bottom: 1px;
+    padding-left: 5px;
+    flex: none;
+}
+
+.pVMtpLzfYWO__partner-name {
+    padding: 0 5px 0 19px;
+    font-size: 14px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.pVMtpLzfYWO__nightly-price-button {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    font: inherit;
+    list-style: none;
+    outline: 0;
+    overflow: visible;
+    padding: 0;
+    vertical-align: baseline;
+    cursor: pointer;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-align-items: center;
+    align-items: center;
+    margin-left: auto;
+    color: inherit;
+}
+
+.pVMtpLzfYWO__click-through-icon {
+    background-image: url(//www.gstatic.com/images/icons/material/system_gm/1x/keyboard_arrow_right_gm_grey_18dp.png);
+    background-size: 18px;
+    display: inline-block;
+    height: 18px;
+    width: 18px;
+    margin-left: 15px;
+    -webkit-flex: none;
+    -ms-flex: none;
+    flex: none;
+}
+
+.hotel-label {
+}
