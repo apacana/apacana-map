@@ -1,9 +1,11 @@
 markerFlag = false;
 userMarkers = [];
+userNameMarker = [];
+userMarketIndex = 0;
 searchMarkets = null;
 popupOption = {
     autoPanPaddingTopLeft: L.point(350, 80),
-    autoPanPaddingBottomRight: L.point(100, 100)
+    autoPanPaddingBottomRight: L.point(420, 100)
 };
 addRoutePointSwitch = false;
 addRoutePointToken = '';
@@ -160,19 +162,21 @@ let packPointInfo = function(text, place_name, point_id, point_type, point_token
 
 let searchMarketToUserMarket = function(index, point_token) {
     let market = searchMarkets[index];
-    market.setPopupContent(userMarketPopup(market["options"]["text"], market["options"]["place_name"], market["options"]["lat"], market["options"]["lon"], popupOption));
+    market.setPopupContent(userMarketPopup(market["options"]["text"], market["options"]["place_name"], market["options"]["lat"], market["options"]["lon"]), popupOption);
 
     let lat = parseFloat(market["options"]["lat"]);
     let lon = parseFloat(market["options"]["lon"]);
-    let userMarker = L.marker([lat, lon], {icon: addIcon(L.mapbox), point_id: market["options"]["point_id"], point_type: "search_point", point_token: point_token, text: market["options"]["text"]});
+    let userMarker = L.marker([lat, lon], {index: userMarketIndex, icon: addIcon(L.mapbox), point_id: market["options"]["point_id"], point_type: "search_point", point_token: point_token, text: market["options"]["text"]});
     userMarker.addTo(map);
     userMarker.bindPopup(userMarketPopup(market["options"]["text"], market["options"]["place_name"], lat, lon), popupOption);
     userMarkers.push(userMarker);
+    userMarketIndex += 1;
 };
 
 selectUserMarket = function(point_id, point_type) {
+    console.log(point_id, point_type, userMarkers);
     for(let point of userMarkers) {
-        if (point["options"]["point_id"] === point_id && point["options"]["point_type"] === point_type) {
+        if (point["options"]["point_id"] == point_id && point["options"]["point_type"] === point_type) {
             if (addRoutePointSwitch === true) {
                 console.log("point:", point._latlng);
                 addRoutePoint(addRoutePointToken, point, addRoutePointColor);
@@ -181,6 +185,10 @@ selectUserMarket = function(point_id, point_type) {
             point.openPopup();
         }
     }
+};
+
+choseUserMarket = function(index) {
+    // todo user market选择方式重构
 };
 
 let allowAddSearchMarket = function(point_id, point_type = 'search_point') {
@@ -194,8 +202,14 @@ let allowAddSearchMarket = function(point_id, point_type = 'search_point') {
 
 setUserMarket = function (pointList) {
     userMarkers = [];
+    hotelIDs = [];
+    let nowTime = new Date();
+    nowTime.setDate(nowTime.getDate() + 1);
+    let checkInTime = nowTime.format("yyyy-MM-dd");
+    nowTime.setDate(nowTime.getDate() + 1);
+    let checkOutTime = nowTime.format("yyyy-MM-dd");
     for(let point of pointList) {
-        let marker = L.marker([-360, -360], {icon: addIcon(L.mapbox), point_id: point["point_id"], point_type: point["point_type"], point_token: point["point_token"], text: point["text"]});
+        let marker = L.marker([-360, -360], {index: userMarketIndex, icon: addIcon(L.mapbox), point_id: point["point_id"], point_type: point["point_type"], point_token: point["point_token"], text: point["text"]});
         marker.addTo(map);
         let [lon, lat] = point["center"].split(",");
         marker.setLatLng([lat, lon]);
@@ -203,7 +217,17 @@ setUserMarket = function (pointList) {
         lon = parseFloat(lon);
         marker.bindPopup(userMarketPopup(point["text"], point["place_name"], lat, lon), popupOption);
         userMarkers.push(marker);
+        userMarketIndex += 1;
+        if (point["point_type"] === 'agoda_hotel') {
+            hotelIDs.push(point["point_id"]);
+            marker.setIcon(addIcon(L.mapbox, 'building'));
+            let nameMarker = L.marker([lat, lon], {icon: textIcon(`${point["text"]} ¥???`), point_id: point["point_id"], point_type: "agoda_hotel"});
+            nameMarker.addTo(map);
+            userNameMarker.push(nameMarker);
+            searchHotelPrice(marker, checkInTime, checkOutTime);
+        }
     }
+    mGetHotelInfo(hotelIDs);
 };
 
 userMarketPopup = function(text, place_name, lat, lon) {

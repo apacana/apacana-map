@@ -115,13 +115,17 @@ let bindStrokeInfo = function(strokeList) {
 createPointHtml = function (point) {
     pane = `<div class="point-list-layer-body-item">
                                             <div class="point-logo">
-                                                <div class="point-logo-svg" style="background-position:center; background-size:contain;" iconcode="1899-0288D1">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="fill: #0052CC"><g>
+                                                <div class="point-logo-svg" style="background-position:center; background-size:contain;" iconcode="1899-0288D1">`;
+    if (point["point_type"] === 'agoda_hotel') {
+        pane += `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="21" height="21" style="fill: #0052CC"><path fill="none" d="M0 0h24v24H0z"/><path d="M22 21H2v-2h1V4a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v5h2v10h1v2zm-5-2h2v-8h-6v8h2v-6h2v6zm0-10V5H5v14h6V9h6zM7 11h2v2H7v-2zm0 4h2v2H7v-2zm0-8h2v2H7V7z" fill="#0052CC"/></svg>`;
+    } else {
+        pane += `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="fill: #0052CC"><g>
                                                             <path fill="none" d="M0 0h24v24H0z"/>
                                                             <path d="M12 23.728l-6.364-6.364a9 9 0 1 1 12.728 0L12 23.728zm4.95-7.778a7 7 0 1 0-9.9 0L12 20.9l4.95-4.95zM12 13a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/>
                                                         </g>
-                                                    </svg>
-                                                </div>
+                                                    </svg>`;
+    }
+    pane += `</div>
                                             </div>
                                             <div class="point-font-container">
                                                 <div class="point-font" onclick="selectUserMarket('${point["point_id"]}', '${point["point_type"]}')">${point["text"]}</div>
