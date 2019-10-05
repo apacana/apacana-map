@@ -187,10 +187,6 @@ selectUserMarket = function(point_id, point_type) {
     }
 };
 
-choseUserMarket = function(index) {
-    // todo user market选择方式重构
-};
-
 let allowAddSearchMarket = function(point_id, point_type = 'search_point') {
     for(let point of userMarkers) {
         if (point["options"]["point_id"] === point_id && point["options"]["point_type"] === point_type) {

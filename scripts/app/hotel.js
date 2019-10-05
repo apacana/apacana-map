@@ -131,7 +131,7 @@ textIcon = function (htmlText) {
 };
 
 packHotelSummary = function (hotel) {
-    return `星级: ${hotel["starRating"]}, 评分: ${hotel["reviewScore"]}, 价格: ${hotel["dailyRate"]}¥ <a style="color: #0052cc">点击预定</a>`;
+    return `星级: ${hotel["starRating"]}, 评分: ${hotel["reviewScore"]}, 价格: ¥${hotel["dailyRate"]} <a style="color: #0052cc">点击预定</a>`;
 };
 
 hotelMarketPopup = function(index, point_id, text, place_name, lat, lon, url = '') {
