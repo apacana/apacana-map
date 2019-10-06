@@ -4,6 +4,8 @@ routePointMap = new Map();
 routeColorMap = new Map();
 routePointMapMutex = false;
 routeDirectionMap = new Map();
+changeStrokeNameMutex = false;
+changeRouteNameMutex = new Map();
 
 addFirstStroke = function (stroke_name = '') {
     fetch(requestConfig.domain + requestConfig.addStroke, {
@@ -42,6 +44,58 @@ createStrokeVar = function (stroke_name, stroke_token, update_time, point_list =
     return object
 };
 
+changeStrokeNameKeyUp = function (event) {
+    if(event.keyCode === 13) {
+        changeStrokeNameMutex = true;
+        changeStrokeNameOnBlur('changeStrokeNameKeyUp');
+    }
+};
+
+changeStrokeName = function () {
+    let strokeName = document.getElementById('map-title-desc-bar-name-span').innerHTML;
+    document.getElementById('map-title-desc-bar-name').innerHTML = `<input type='text' id="new-default-stroke-name" value='${strokeName}' onBlur="changeStrokeNameOnBlur('source')" onfocus="this.select()" onmouseover="this.select()" onkeyup="changeStrokeNameKeyUp(event);" autofocus=true style="height: 13px; font-size: 9px; padding: 0" />`;
+};
+
+updateStrokeName = function (stroke_name) {
+    document.getElementById('map-title-desc-bar-name').innerHTML = `<span id="map-title-desc-bar-name-span" style="cursor: pointer" onclick="changeStrokeName()">${stroke_name}</span>`
+};
+
+updateStrokeRequire = function (stroke_token, stroke_name, old_name) {
+    fetch(requestConfig.domain + requestConfig.updateStroke, {
+        credentials: 'include',
+        method: 'POST',
+        body: '{"stroke_name": "' + stroke_name + '",' +
+            '"stroke_token": "' + stroke_token + '"}',
+    }).then(response => {
+        return response.json();
+    }).then(data => {
+        console.log(data);
+        if (data.code !== 0) {
+            console.log("updateStroke failed, code:", data.code);
+            updateStrokeName(old_name);
+        } else {
+            updateStrokeUpdateTime(data.data["update_time"]);
+            updateStrokeName(stroke_name);
+            userInfoMem["strokes_info"]["default_stroke"]["stroke_name"] = stroke_name;
+        }
+    }).catch(function(e) {
+        console.log("updateStroke error", e);
+    });
+};
+
+changeStrokeNameOnBlur = function (source) {
+    if (source === 'source' && changeStrokeNameMutex === true) {
+        changeStrokeNameMutex = false;
+        return;
+    }
+    let newStrokeName = document.getElementById(`new-default-stroke-name`).value;
+    if (userInfoMem["strokes_info"]["default_stroke"]["stroke_name"] !== newStrokeName) {
+        updateStrokeRequire(userInfoMem["strokes_info"]["default_stroke"]["stroke_token"], newStrokeName, userInfoMem["strokes_info"]["default_stroke"]["stroke_name"]);
+    } else {
+        updateStrokeName(newStrokeName);
+    }
+};
+
 let bindStrokeInfo = function(strokeList) {
     let pane;
     let size = getClientSize();
@@ -49,7 +103,7 @@ let bindStrokeInfo = function(strokeList) {
                     <div id="featurelist-title-bar" class="featurelist-title-barClass">
                         <div id="map-action-menu" class="map-action-menuClass"></div>
                         <div id="map-title-desc-bar">
-                            <div id="map-title-desc-bar-name" class="map-title-desc-bar-nameClass">${strokeList["default_stroke"]["stroke_name"]}</div>
+                            <div id="map-title-desc-bar-name" class="map-title-desc-bar-nameClass" style="height: 18px;"><span id="map-title-desc-bar-name-span" style="cursor: pointer" onclick="changeStrokeName()">${strokeList["default_stroke"]["stroke_name"]}</span></div>
                             <div id="map-title-desc-bar-time" class="map-title-desc-bar-timeClass">
                                 <div id="stroke_update_time">上次修改时间: ${strokeList["default_stroke"]["update_time"]}</div>
                             </div>
@@ -137,6 +191,72 @@ createPointHtml = function (point) {
     return pane;
 };
 
+changeRouteNameKeyUp = function (event, route_token) {
+    if(event.keyCode === 13) {
+        changeRouteNameMutex.set(route_token, true);
+        changeRouteNameOnBlur('changeRouteNameKeyUp', route_token);
+    }
+};
+
+changeRouteNameOnBlur = function (source, route_token) {
+    let mutex = changeRouteNameMutex.get(route_token);
+    if (source === 'source' && typeof(mutex) !== 'undefined' && mutex === true) {
+        changeRouteNameMutex.set(route_token, false);
+        return;
+    }
+    let newRouteName = document.getElementById(`new-route-name${route_token}`).value;
+    let routeName = '';
+    for (let route of userInfoMem["strokes_info"]["default_stroke"]["route_list"]) {
+        if (route["route_token"] === route_token) {
+            routeName = route["route_name"];
+            break;
+        }
+    }
+    if (routeName !== newRouteName) {
+        updateRouteRequire(route_token, newRouteName, routeName);
+    } else {
+        updateRouteName(route_token, newRouteName);
+    }
+};
+
+updateRouteRequire = function (route_token, route_name, old_name) {
+    fetch(requestConfig.domain + requestConfig.updateRoute, {
+        credentials: 'include',
+        method: 'POST',
+        body: '{"route_token": "' + route_token + '",' +
+            '"route_name": "' + route_name + '"}',
+    }).then(response => {
+        return response.json();
+    }).then(data => {
+        console.log(data);
+        if (data.code !== 0) {
+            console.log("updateRoute failed, code:", data.code);
+            updateRouteName(route_token, old_name);
+        } else {
+            updateStrokeUpdateTime(data.data["update_time"]);
+            updateRouteName(route_token, route_name);
+            for (let route of userInfoMem["strokes_info"]["default_stroke"]["route_list"]) {
+                if (route["route_token"] === route_token) {
+                    route["route_name"] = route_name;
+                    break;
+                }
+            }
+        }
+    }).catch(function(e) {
+        console.log("updateRoute error", e);
+    });
+};
+
+
+updateRouteName = function (route_token, route_name) {
+    document.getElementById(`route-name${route_token}`).innerHTML = `<span id="route-name${route_token}-span" style="cursor: pointer" onclick="changeRouteName('${route_token}')">${route_name}</span>`
+};
+
+changeRouteName = function (route_token) {
+    let routeName = document.getElementById(`route-name${route_token}-span`).innerHTML;
+    document.getElementById(`route-name${route_token}`).innerHTML = `<input type='text' id="new-route-name${route_token}" value='${routeName}' onBlur="changeRouteNameOnBlur('source', '${route_token}')" onfocus="this.select()" onmouseover="this.select()" onkeyup="changeRouteNameKeyUp(event, '${route_token}');" autofocus=true style="height: 13px; font-size: 9px; padding: 0" />`;
+};
+
 createRouteHtml = function (route) {
     lastRoute = `route_item_${route["route_token"]}`;
     let pane = `                            <div class="point-list-layer-body-item" id="route_item_${route["route_token"]}" style="padding-left: 25px;">
@@ -156,7 +276,7 @@ createRouteHtml = function (route) {
                                                 </div>
                                             </div>
                                             <div class="point-font-container">
-                                                <div class="point-font" id="" onclick="routeInfoClick('${route["route_token"]}')" style="">${route["route_name"]}</div>
+                                                <div class="point-font" id="route-name${route["route_token"]}" style=""><span id="route-name${route["route_token"]}-span" style="cursor: pointer" onclick="changeRouteName('${route["route_token"]}')">${route["route_name"]}</span></div>
                                             </div>
                                         </div>
                                             <div style="padding-left: 46px" id="route_info_list_${route["route_token"]}"></div>`;

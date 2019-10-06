@@ -14,6 +14,8 @@ define(function () {
         searchHotel: "/api/hotel/agoda/search/",
         getHotel: "/api/hotel/agoda/get/",
         hotelBooking: "/api/hotel/agoda/booking/",
+        updateStroke: "/api/stroke/update/",
+        updateRoute: "/api/route/update/",
 
         mapBoxDomain: "https://api.mapbox.com/directions/v5/",
     };

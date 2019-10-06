@@ -174,7 +174,6 @@ let searchMarketToUserMarket = function(index, point_token) {
 };
 
 selectUserMarket = function(point_id, point_type) {
-    console.log(point_id, point_type, userMarkers);
     for(let point of userMarkers) {
         if (point["options"]["point_id"] == point_id && point["options"]["point_type"] === point_type) {
             if (addRoutePointSwitch === true) {
