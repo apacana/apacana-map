@@ -509,16 +509,16 @@ getRoute = function (route_token) {
     });
 };
 
-choseDirectionType = function (index, now, other) {
+choseDirectionType = function (route_token, index, now, other) {
     let pane = `${unescape(now)}${unescape(other)}`;
-    pane += `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="11" height="11" style="padding-bottom: 5px; cursor: pointer" onclick="closeDirectionType('${index}', '${now}', '${other}')"><path fill="none" d="M0 0h24v24H0z"/><path d="M10.828 12l4.95 4.95-1.414 1.414L8 12l6.364-6.364 1.414 1.414z" fill="#000"/></svg>`;
-    document.getElementById(`direction-logo-${index}`).innerHTML = pane;
+    pane += `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="11" height="11" style="padding-bottom: 5px; cursor: pointer" onclick="closeDirectionType('${route_token}', '${index}', '${now}', '${other}')"><path fill="none" d="M0 0h24v24H0z"/><path d="M10.828 12l4.95 4.95-1.414 1.414L8 12l6.364-6.364 1.414 1.414z" fill="#000"/></svg>`;
+    document.getElementById(`direction-logo-${route_token}-${index}`).innerHTML = pane;
 };
 
-closeDirectionType = function (index, now, other) {
+closeDirectionType = function (route_token, index, now, other) {
     let pane = `${unescape(now)}`;
-    pane += `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="11" height="11" style="padding-bottom: 5px; cursor: pointer" onclick="choseDirectionType('${index}', '${now}', '${other}')"><path fill="none" d="M0 0h24v24H0z"/><path d="M13.172 12l-4.95-4.95 1.414-1.414L16 12l-6.364 6.364-1.414-1.414z" fill="#000"/></svg>`;
-    document.getElementById(`direction-logo-${index}`).innerHTML = pane;
+    pane += `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="11" height="11" style="padding-bottom: 5px; cursor: pointer" onclick="choseDirectionType('${route_token}', '${index}', '${now}', '${other}')"><path fill="none" d="M0 0h24v24H0z"/><path d="M13.172 12l-4.95-4.95 1.414-1.414L16 12l-6.364 6.364-1.414-1.414z" fill="#000"/></svg>`;
+    document.getElementById(`direction-logo-${route_token}-${index}`).innerHTML = pane;
 };
 
 createDirectionHtml = function (route_token, index, direction, color, direction_type = 'driving-traffic') {
@@ -553,9 +553,9 @@ createDirectionHtml = function (route_token, index, direction, color, direction_
     let pane = `<div class="point-list-layer-body-item">
                                     <span style="margin-left: 11px; color: ${color}">|</span>
                                             <div class="point-logo">
-                                                <div class="point-logo-svg" id="direction-logo-${index}" style="background-position:center; background-size:contain; background-color: #FFFFFF;" iconcode="1899-0288D1">`;
+                                                <div class="point-logo-svg" id="direction-logo-${route_token}-${index}" style="background-position:center; background-size:contain; background-color: #FFFFFF;" iconcode="1899-0288D1">`;
     pane += now;
-    pane += `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="11" height="11" style="padding-bottom: 5px; cursor: pointer" onclick="choseDirectionType('${index}', '${escape(now)}', '${escape(other)}')"><path fill="none" d="M0 0h24v24H0z"/><path d="M13.172 12l-4.95-4.95 1.414-1.414L16 12l-6.364 6.364-1.414-1.414z" fill="#000"/></svg>`;
+    pane += `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="11" height="11" style="padding-bottom: 5px; cursor: pointer" onclick="choseDirectionType('${route_token}', '${index}', '${escape(now)}', '${escape(other)}')"><path fill="none" d="M0 0h24v24H0z"/><path d="M13.172 12l-4.95-4.95 1.414-1.414L16 12l-6.364 6.364-1.414-1.414z" fill="#000"/></svg>`;
 
     let distance = '';
     if (typeof(direction["distance"]) != 'undefined' && direction["distance"] > 100) {
