@@ -8,11 +8,20 @@ let getMap = function(id) {
         contextmenu: true,
         contextmenuWidth: 140,
         contextmenuItems: [{
+            text: '清空搜索结果',
+            callback: emptySearchResult
+        }, '-', {
             text: '查询附近的酒店',
             callback: searchNearHotel
         }, {
             text: '清空酒店搜索结果',
             callback: emptyHotel
+        }, '-', {
+            text: '地图采点',
+            callback: setMapPoint
+        }, {
+            text: '清空地图采点',
+            callback: emptyMapPoint
         }]
     }).setMaxBounds([[-90, -180], [90, 180]]);
 
@@ -37,6 +46,8 @@ define(function (require) {
     require("leaflet-provider");
     require("leaflet-contextmenu");
     require("./hotel");
+    require("./search_result");
+    require("./map_point");
 
     return {
         getMap: getMap

@@ -29,6 +29,11 @@ let makeGetUserInfoRequest = function() {
         } else {
             userInfoMem = data.data;
             console.log(userInfoMem);
+            if (typeof(data.data["map_center"]) !== "undefined") {
+                if (data.data["map_center"]["latitude"] !== 404) {
+                    setCenter(data.data["map_center"]["latitude"],data.data["map_center"]["longitude"],data.data["map_center"]["zoom"]);
+                }
+            }
             if (data.data["strokes_info"] == null) {
                 // 没有行程信息
                 let pane = `<div id="featurelist-titlebar-container" style="height: 763px">

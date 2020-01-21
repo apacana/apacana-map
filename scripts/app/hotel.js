@@ -166,7 +166,7 @@ addHotelPoint = function (index, point_id, text, place_name, center, point_type 
         if (data.code !== 0) {
             console.log("addPoint failed, code:", data.code);
         } else {
-            searchHotelToUserMarket(index, data.data["point_info"]["point_token"]);
+            searchHotelToUserMarket(point_id, point_type, data.data["point_info"]["point_token"]);
             // change feature list
             if (typeof(userInfoMem["strokes_info"]) == "undefined") {
                 userInfoMem.strokes_info = {};
@@ -212,22 +212,35 @@ userHotelMarket = function(point_id, text, place_name, lat, lon, url = '') {
                 </div>`
 };
 
-searchHotelToUserMarket = function (index, point_token) {
-    let market = hotelMarker[index];
-    market.setPopupContent(userHotelMarket(market["options"]["hotel"]["hotelId"], market["options"]["hotel"]["hotelName"], packHotelSummary(market["options"]["hotel"]), market["options"]["hotel"]["latitude"], market["options"]["hotel"]["longitude"], market["options"]["hotel"]["landingURL"]), popupOption);
-
-    let lat = parseFloat(market["options"]["hotel"]["latitude"]);
-    let lon = parseFloat(market["options"]["hotel"]["longitude"]);
-    let userMarker = L.marker([lat, lon], {index: userMarketIndex, icon: addIcon(L.mapbox, 'building'), point_id: market["options"]["point_id"], point_type: "agoda_hotel", point_token: point_token, text: market["options"]["hotel"]["hotelName"], hotel: market["options"]["hotel"]});
-    userMarker.addTo(map);
-    userMarker.bindPopup(userHotelMarket(market["options"]["hotel"]["hotelId"], market["options"]["hotel"]["hotelName"], packHotelSummary(market["options"]["hotel"]), market["options"]["hotel"]["latitude"], market["options"]["hotel"]["longitude"], market["options"]["hotel"]["landingURL"]), popupOption);
-    userMarkers.push(userMarker);
-    userMarketIndex += 1;
-
-    hotelNameMarker[index].removeFrom(map);
-    let nameMarker = L.marker([lat, lon], {icon: textIcon(`${market["options"]["hotel"]["hotelName"]} ¥${market["options"]["hotel"]["dailyRate"]}`), point_id: market["options"]["hotel"]["hotelId"], point_type: "agoda_hotel"});
-    nameMarker.addTo(map);
-    userNameMarker.push(nameMarker);
+// 酒店添加到点集后用户点集变动
+searchHotelToUserMarket = function (point_id, point_type, point_token) {
+    point_id = Number(point_id);
+    for (let i = 0; i < hotelMarker.length; i++) {
+        if (hotelMarker[i]["options"]["point_id"] === point_id && hotelMarker[i]["options"]["point_type"] === point_type) {
+            hotelMarker[i].setPopupContent(userHotelMarket(hotelMarker[i]["options"]["hotel"]["hotelId"], hotelMarker[i]["options"]["hotel"]["hotelName"], packHotelSummary(hotelMarker[i]["options"]["hotel"]), hotelMarker[i]["options"]["hotel"]["latitude"], hotelMarker[i]["options"]["hotel"]["longitude"], hotelMarker[i]["options"]["hotel"]["landingURL"]), hotelPopupOption);
+            let lat = parseFloat(hotelMarker[i]["options"]["hotel"]["latitude"]);
+            let lon = parseFloat(hotelMarker[i]["options"]["hotel"]["longitude"]);
+            let userMarker = L.marker([lat, lon], {index: userMarketIndex, icon: addIcon(L.mapbox, 'building'), point_id: hotelMarker[i]["options"]["point_id"], point_type: "agoda_hotel", point_token: point_token, text: hotelMarker[i]["options"]["hotel"]["hotelName"], hotel: hotelMarker[i]["options"]["hotel"]});
+            userMarker.addTo(map);
+            userMarker.bindPopup(userHotelMarket(hotelMarker[i]["options"]["hotel"]["hotelId"], hotelMarker[i]["options"]["hotel"]["hotelName"], packHotelSummary(hotelMarker[i]["options"]["hotel"]), hotelMarker[i]["options"]["hotel"]["latitude"], hotelMarker[i]["options"]["hotel"]["longitude"], hotelMarker[i]["options"]["hotel"]["landingURL"]), hotelPopupOption);
+            userMarkers.push(userMarker);
+            userMarketIndex += 1;
+            for (let j = 0; j < hotelNameMarker.length; j++) {
+                if (hotelNameMarker[j]["options"]["point_id"] === point_id && hotelNameMarker[j]["options"]["point_type"] === point_type) {
+                    let nameMarker = L.marker([lat, lon], {icon: textIcon(`${hotelMarker[i]["options"]["hotel"]["hotelName"]} ¥${hotelMarker[i]["options"]["hotel"]["dailyRate"]}`), point_id: hotelMarker[i]["options"]["hotel"]["hotelId"], point_type: "agoda_hotel", point_token: point_token});
+                    nameMarker.addTo(map);
+                    userNameMarker.push(nameMarker);
+                    hotelNameMarker[j].removeFrom(map);
+                    hotelNameMarker.splice(j, 1);
+                    break
+                }
+            }
+            // 添加后会存在闪烁，故不删除原来点，在行程点被删除后删除
+            // hotelMarker[i].removeFrom(map);
+            // hotelMarker.splice(i, 1);
+            break
+        }
+    }
 };
 
 function getClientSize() {
@@ -473,7 +486,7 @@ showHotelInfo = function (marker) {
     });
 };
 
-searchHotelPrice = function (marker, checkInTime, checkOutTime) {
+searchHotelPrice = function (marker, checkInTime, checkOutTime, isAdd = false) {
     fetch(requestConfig.domain + requestConfig.hotelBooking, {
         credentials: 'include',
         method: 'POST',
@@ -497,7 +510,11 @@ searchHotelPrice = function (marker, checkInTime, checkOutTime) {
                     marker["options"]["hotel"] = hotel;
                     marker["options"]["hotel"]["check_in_data"] = checkInTime;
                     marker["options"]["hotel"]["check_out_data"] = checkOutTime;
-                    marker.setPopupContent(hotelMarketPopup(marker["options"]["index"], marker["options"]["hotel"]["hotelId"], marker["options"]["hotel"]["hotelName"], packHotelSummary(marker["options"]["hotel"]), marker["options"]["hotel"]["latitude"], marker["options"]["hotel"]["longitude"], marker["options"]["hotel"]["landingURL"]), popupOption);
+                    if (isAdd === true) {
+                        marker.setPopupContent(userHotelMarket(marker["options"]["hotel"]["hotelId"], marker["options"]["hotel"]["hotelName"], packHotelSummary(marker["options"]["hotel"]), marker["options"]["hotel"]["latitude"], marker["options"]["hotel"]["longitude"], marker["options"]["hotel"]["landingURL"]), popupOption);
+                    } else {
+                        marker.setPopupContent(hotelMarketPopup(marker["options"]["index"], marker["options"]["hotel"]["hotelId"], marker["options"]["hotel"]["hotelName"], packHotelSummary(marker["options"]["hotel"]), marker["options"]["hotel"]["latitude"], marker["options"]["hotel"]["longitude"], marker["options"]["hotel"]["landingURL"]), popupOption);
+                    }
                     let pane = setAgodaHotelBooking(marker["options"]["hotel"]);
                     if (document.getElementById(`agoda_hotel_${marker["options"]["point_id"]}`)) {
                         document.getElementById(`agoda_hotel_${marker["options"]["point_id"]}`).innerHTML = pane;

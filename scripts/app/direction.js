@@ -10,7 +10,7 @@ changeDirection = function (route_token, index, direction_type) {
 };
 
 resetDirection = function (index, start_lon, start_lat, end_lon, end_lat, route_token, route_color, profile = 'driving-traffic') {
-    let url = requestConfig.mapBoxDomain + 'mapbox/' + profile + '/' + start_lon + '%2C' + start_lat + '%3B' + end_lon + '%2C' + end_lat + '.json?access_token=pk.eyJ1IjoiYWFyb25saWRtYW4iLCJhIjoiNTVucTd0TSJ9.wVh5WkYXWJSBgwnScLupiQ&geometries=geojson&overview=full';
+    let url = requestConfig.mapBoxDirectionsDomain + 'mapbox/' + profile + '/' + start_lon + '%2C' + start_lat + '%3B' + end_lon + '%2C' + end_lat + '.json?access_token=pk.eyJ1IjoiYWFyb25saWRtYW4iLCJhIjoiNTVucTd0TSJ9.wVh5WkYXWJSBgwnScLupiQ&geometries=geojson&overview=full';
     fetch(url, {
         method: 'GET',
     }).then(response => {
@@ -45,7 +45,7 @@ resetDirection = function (index, start_lon, start_lat, end_lon, end_lat, route_
                         let directionStruct = JSON.parse(point["direction"]);
                         pane += createDirectionHtml(route_token, newIndex, directionStruct, route_color, point["direction_type"]);
                     }
-                    pane += createPointHtml(point);
+                    pane += createPointHtml(point, route_token, newIndex);
                     newIndex += 1
                 }
                 pane += addRoutePointLogo(route_token, route_color);

@@ -1,7 +1,7 @@
 checkBoxOpen = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="21" height="21"><path fill="none" d="M0 0h24v24H0z"/><path d="M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm1 2v14h14V5H5zm6.003 11L6.76 11.757l1.414-1.414 2.829 2.829 5.656-5.657 1.415 1.414L11.003 16z" fill="#000"/></svg>`;
 checkBoxClose = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="21" height="21"><path fill="none" d="M0 0h24v24H0z"/><path d="M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm1 2v14h14V5H5z" fill="#000"/></svg>`;
-routePointMap = new Map();
-routeColorMap = new Map();
+routePointMap = new Map(); // 路线点全局变量
+routeColorMap = new Map(); // 路线颜色全局变量
 routePointMapMutex = false;
 routeDirectionMap = new Map();
 changeStrokeNameMutex = false;
@@ -169,8 +169,9 @@ let bindStrokeInfo = function(strokeList) {
     return pane
 };
 
-createPointHtml = function (point) {
-    let pane = `<div class="point-list-layer-body-item">
+// 显示 点集/路线集 中点
+createPointHtml = function (point, route_token = "", index = 0) {
+    let pane = `<div class="point-list-layer-body-item" onmouseover="showPointClose('point_item_close_${point["point_id"]}_${route_token}_${index}')" onmouseout="removePointClose('point_item_close_${point["point_id"]}_${route_token}_${index}')">
                                             <div class="point-logo">
                                                 <div class="point-logo-svg" style="background-position:center; background-size:contain;" iconcode="1899-0288D1">`;
     if (point["point_type"] === 'agoda_hotel') {
@@ -184,11 +185,163 @@ createPointHtml = function (point) {
     }
     pane += `</div>
                                             </div>
+                                            <div id="point_item_close_${point["point_id"]}_${route_token}_${index}" class="is-none" style="cursor: pointer;height: 16px; opacity: .5; top: 4px; width: 16px; position: absolute; right: 0;" onclick="removePoint('${point["point_token"]}', '${route_token}', '${index}')">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+                                                    <path fill="none" d="M0 0h24v24H0z"/><path d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95L7.05 5.636z"/>
+                                                </svg>
+                                            </div>
                                             <div class="point-font-container">
                                                 <div class="point-font" onclick="selectUserMarket('${point["point_id"]}', '${point["point_type"]}')">${point["text"]}</div>
                                             </div>
                                         </div>`;
     return pane;
+};
+
+// 移除点函数
+removePoint = function(point_token, route_token, index) {
+    index = Number(index);
+    if (route_token !== "") {
+        // route路线点删除
+        let routePoint = routePointMap.get(route_token);
+        let length = routePoint.length;
+        if (index >= length) {
+            console.log("removePoint parm error");
+            return
+        }
+        if (length === 0) {
+            // 空列表，无需操作
+            return
+        } else if (length === 1) {
+            // 只有一个点，直接删除
+            routePointMap.set(route_token, []);
+            refreshRouteInfoList(route_token);
+            removePointRequest(route_token, 0);
+        } else {
+            // ui 先删除相关状态
+            if (index === length - 1) {
+                // 直接删除最后一个点
+                routePoint.pop();
+                if (typeof(routeDirectionMap.get(route_token)) === 'undefined') {
+                } else {
+                    let polylineList = routeDirectionMap.get(route_token);
+                    polylineList[index-1].removeFrom(map);
+                    polylineList.pop();
+                    routeDirectionMap.set(route_token, polylineList);
+                }
+                routePointMap.set(route_token, routePoint);
+                refreshRouteInfoList(route_token);
+                removePointRequest(route_token, index);
+            } else if (index === 0) {
+                // 直接删除第一个点和第二个点的路径
+                routePoint.shift();
+                routePoint[0].direction = "";
+                if (typeof(routeDirectionMap.get(route_token)) === 'undefined') {
+                } else {
+                    let polylineList = routeDirectionMap.get(route_token);
+                    polylineList[0].removeFrom(map);
+                    polylineList.shift();
+                    routeDirectionMap.set(route_token, polylineList);
+                }
+                routePointMap.set(route_token, routePoint);
+                refreshRouteInfoList(route_token);
+                removePointRequest(route_token, 0);
+            } else {
+                // 删除中间点，删除该点与后点路径，获取前点与后点的路径，通知后端更新
+                routePoint.splice(index, 1);
+                routePoint[index].direction = "";
+                if (typeof(routeDirectionMap.get(route_token)) === 'undefined') {
+                } else {
+                    let polylineList = routeDirectionMap.get(route_token);
+                    polylineList[index - 1].removeFrom(map);
+                    polylineList[index].removeFrom(map);
+                    polylineList.splice(index - 1, 2);
+                    routeDirectionMap.set(route_token, polylineList);
+                }
+                routePointMap.set(route_token, routePoint);
+                refreshRouteInfoList(route_token);
+                let [lon_start, lat_start] = routePoint[index-1]["center"].split(",");
+                let [lon_end, lat_end] = routePoint[index]["center"].split(",");
+                console.log(lon_start, lat_start, lon_end, lat_end);
+                getNewDirection(index, lon_start, lat_start, lon_end, lat_end, route_token)
+            }
+        }
+    } else {
+        // 全局点删除
+        deletePoint(point_token);
+    }
+};
+
+// backen-添加路线点
+removePointRequest = function (route_token, index, direction = '', profile = '') {
+    // addRoutePointRequest
+    fetch(requestConfig.domain + requestConfig.removeRoutePoint, {
+        credentials: 'include',
+        method: 'POST',
+        body: '{"route_token": "' + route_token + '",' +
+            '"index": ' + index + ',' +
+            '"direction_type": "' + profile + '",' +
+            '"direction": ' + JSON.stringify(direction) + '}',
+    }).then(response => {
+        return response.json();
+    }).then(data => {
+        console.log(data);
+        if (data.code !== 0) {
+            console.log("removeRoutePoint failed, code:", data.code);
+        } else {
+            // 更新时间
+            updateStrokeUpdateTime(data.data["update_time"]);
+        }
+    }).catch(function(e) {
+        console.log("addRoutePoint error", e);
+    });
+};
+
+// 整体刷新行程点集列表
+refreshRouteList = function () {
+    let pane = '';
+    for (let point of userInfoMem["strokes_info"]["default_stroke"]["point_list"]) {
+        pane += createPointHtml(point);
+    }
+    let id = `point_list`;
+    if (document.getElementById(id)) {
+        document.getElementById(id).innerHTML = pane;
+    } else {
+        console.log("getElementById failed");
+    }
+};
+
+// 整体刷新RouteInfoList
+refreshRouteInfoList = function (route_token) {
+    let routePoint = routePointMap.get(route_token);
+    let id = `route_info_list_${route_token}`;
+    let color = routeColorMap.get(route_token);
+
+    let pane = "";
+    let index = 0;
+    for(let point of routePoint) {
+        if (point["direction"] !== '') {
+            let direction = JSON.parse(point["direction"]);
+            pane += createDirectionHtml(route_token, index, direction, color, point["direction_type"]);
+        }
+        pane += createPointHtml(point, route_token, index);
+        index += 1
+    }
+    pane += addRoutePointLogo(route_token, color);
+    if (document.getElementById(id)) {
+        document.getElementById(id).innerHTML = pane;
+    } else {
+        console.log("getElementById failed");
+    }
+};
+
+// 显示点删除按钮
+showPointClose = function (id) {
+    document.getElementById(id).classList.remove("is-none");
+};
+
+// 移除点删除按钮
+removePointClose = function (id) {
+    document.getElementById(id).classList.add("is-none");
 };
 
 changeRouteNameKeyUp = function (event, route_token) {
@@ -288,7 +441,7 @@ createRouteHtml = function (route) {
 };
 
 getDirection = function (index, start_lon, start_lat, end_lon, end_lat, route_token, point_token, route_color, profile = 'driving-traffic') {
-    let url = requestConfig.mapBoxDomain + 'mapbox/' + profile + '/' + start_lon + '%2C' + start_lat + '%3B' + end_lon + '%2C' + end_lat + '.json?access_token=pk.eyJ1IjoiYWFyb25saWRtYW4iLCJhIjoiNTVucTd0TSJ9.wVh5WkYXWJSBgwnScLupiQ&geometries=geojson&overview=full';
+    let url = requestConfig.mapBoxDirectionsDomain + 'mapbox/' + profile + '/' + start_lon + '%2C' + start_lat + '%3B' + end_lon + '%2C' + end_lat + '.json?access_token=pk.eyJ1IjoiYWFyb25saWRtYW4iLCJhIjoiNTVucTd0TSJ9.wVh5WkYXWJSBgwnScLupiQ&geometries=geojson&overview=full';
     fetch(url, {
         method: 'GET',
     }).then(response => {
@@ -316,6 +469,38 @@ getDirection = function (index, start_lon, start_lat, end_lon, end_lat, route_to
     });
 };
 
+getNewDirection = function (index, start_lon, start_lat, end_lon, end_lat, route_token, profile = 'driving-traffic') {
+    let route_color = routeColorMap.get(route_token);
+    let url = requestConfig.mapBoxDirectionsDomain + 'mapbox/' + profile + '/' + start_lon + '%2C' + start_lat + '%3B' + end_lon + '%2C' + end_lat + '.json?access_token=pk.eyJ1IjoiYWFyb25saWRtYW4iLCJhIjoiNTVucTd0TSJ9.wVh5WkYXWJSBgwnScLupiQ&geometries=geojson&overview=full';
+    fetch(url, {
+        method: 'GET',
+    }).then(response => {
+        return response.json();
+    }).then(data => {
+        console.log(data);
+        if (data.code !== 'Ok') {
+            console.log("getNewDirection failed, code:", data.code);
+        } else {
+            let direction = '';
+            if (data.routes.length > 0) {
+                let coordinates = changeLonLat(data.routes[0].geometry.coordinates);
+
+                // print to map
+                let polyline = L.polyline(coordinates, {color: route_color}); // 5eb0cc
+                polyline.addTo(map);
+                addPolylineCache(route_token, polyline, index-1);
+                direction = JSON.stringify(data.routes[0]);
+                let routePoint = routePointMap.get(route_token);
+                routePoint[index]["direction"] = direction;
+                refreshRouteInfoList(route_token);
+            }
+            removePointRequest(route_token, index, direction, profile);
+        }
+    }).catch(function(e) {
+        console.log("getNewDirection error", e);
+    });
+};
+
 routePointMapAddDirection = async function(index, route_token, direction, route_color) {
     while (routePointMapMutex === true) {
         await sleep(500);
@@ -331,7 +516,7 @@ routePointMapAddDirection = async function(index, route_token, direction, route_
             let direction = JSON.parse(point["direction"]);
             pane += createDirectionHtml(route_token, newIndex, direction, route_color, point["direction_type"]);
         }
-        pane += createPointHtml(point);
+        pane += createPointHtml(point, route_token, newIndex);
         newIndex += 1;
     }
     pane += addRoutePointLogo(route_token, route_color);
@@ -599,7 +784,7 @@ updateRouteInfoList = async function (route_info) {
             addPolylineCache(route_info["route_token"], polyline);
             pane += createDirectionHtml(route_info["route_token"], index, direction, route_info["route_color"], point["direction_type"]);
         }
-        pane += createPointHtml(point);
+        pane += createPointHtml(point, route_info["route_token"], index);
         pointInfoList.push(point);
         index += 1
     }
@@ -615,14 +800,18 @@ updateRouteInfoList = async function (route_info) {
     }
 };
 
-addPolylineCache = function (route_token, polyline) {
+addPolylineCache = function (route_token, polyline, index = -1) {
     let polylineList = [];
     if (typeof(routeDirectionMap.get(route_token)) === 'undefined') {
     } else {
         polylineList = routeDirectionMap.get(route_token);
     }
 
-    polylineList.push(polyline);
+    if (index === -1) {
+        polylineList.push(polyline);
+    } else {
+        polylineList.splice(index, 0, polyline);
+    }
     routeDirectionMap.set(route_token, polylineList);
 };
 
@@ -687,7 +876,7 @@ addRoutePoint = async function (route_token, point, route_color) {
             let direction = JSON.parse(point["direction"]);
             pane += createDirectionHtml(route_token, index, direction, route_color, point["direction_type"]);
         }
-        pane += createPointHtml(point);
+        pane += createPointHtml(point, route_token, index);
         index += 1
     }
     pane += addRoutePointLogo(route_token, route_color);
@@ -702,6 +891,7 @@ addRoutePoint = async function (route_token, point, route_color) {
     routePointMapMutex = false;
 };
 
+// backen-添加路线点
 addRoutePointRequest = function (route_token, point_token, direction = '') {
     // addRoutePointRequest
     fetch(requestConfig.domain + requestConfig.addRoutePoint, {
@@ -738,3 +928,77 @@ function sleep(ms) {
 define(function (require) {
     require("./direction");
 });
+
+/* ============================================================http request============================================================ */
+
+deletePoint = function (point_token) {
+    console.log("deletePoint", point_token);
+    fetch(requestConfig.domain + requestConfig.deletePoint, {
+        credentials: 'include',
+        method: 'POST',
+        body: '{"point_token": "' + point_token + '"}',
+    }).then(response => {
+        return response.json();
+    }).then(data => {
+        console.log(data);
+        if (data.code !== 0) {
+            console.log("deletePoint failed, code:", data.code);
+            if (data.code === 4003) {
+                let alertStr = "该行程点使用中，使用行程:" + data.data["route_name"];
+                alert(alertStr);
+            }
+        } else {
+            // 删除用户信息中数据，刷新显示
+            removeStrokePoint(point_token);
+            removeStrokePointMark(point_token);
+            refreshRouteList();
+            updateStrokeUpdateTime(data.data["stroke_info"]["update_time"]);
+        }
+    }).catch(function(e) {
+        console.log("deletePoint error:", e);
+    });
+};
+
+removeStrokePoint = function (point_token) {
+    for (let i = 0; i < userInfoMem["strokes_info"]["default_stroke"]["point_list"].length; i++) {
+        if (userInfoMem["strokes_info"]["default_stroke"]["point_list"][i]["point_token"] === point_token) {
+            userInfoMem["strokes_info"]["default_stroke"]["point_list"].splice(i, 1);
+            break
+        }
+    }
+};
+
+removeStrokePointMark = function (point_token) {
+    for (let i = 0; i < userMarkers.length; i++) {
+        if (userMarkers[i]["options"]["point_token"] === point_token) {
+            // 剔除hotelMarker中项目
+            for (let j = 0; j < hotelMarker.length; j++) {
+                if (hotelMarker[j]["options"]["point_id"] === userMarkers[i]["options"]["point_id"] &&
+                    hotelMarker[j]["options"]["point_type"] === userMarkers[i]["options"]["point_type"]) {
+                    hotelMarker[j].removeFrom(map);
+                    // hotelMarker.splice(j, 1);
+                    break
+                }
+            }
+            // 剔除mapPointMarker中项目
+            for (let j = 0; j < mapPointMarker.length; j++) {
+                if (mapPointMarker[j]["options"]["point_id"] === userMarkers[i]["options"]["point_id"] &&
+                    mapPointMarker[j]["options"]["point_type"] === userMarkers[i]["options"]["point_type"]) {
+                    mapPointMarker[j].removeFrom(map);
+                    // hotelMarker.splice(j, 1);
+                    break
+                }
+            }
+            userMarkers[i].removeFrom(map);
+            userMarkers.splice(i, 1);
+            break
+        }
+    }
+    for (let i = 0; i < userNameMarker.length; i++) {
+        if (userNameMarker[i]["options"]["point_token"] === point_token) {
+            userNameMarker[i].removeFrom(map);
+            userNameMarker.splice(i, 1);
+            break
+        }
+    }
+};

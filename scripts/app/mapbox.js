@@ -1,11 +1,11 @@
 markerFlag = false;
-userMarkers = [];
-userNameMarker = [];
+userMarkers = [];    // 行程点集下的点
+userNameMarker = []; // 行程点集中的酒店下文字
 userMarketIndex = 0;
 searchMarkets = null;
 popupOption = {
     autoPanPaddingTopLeft: L.point(350, 80),
-    autoPanPaddingBottomRight: L.point(420, 100)
+    autoPanPaddingBottomRight: L.point(40, 100)
 };
 addRoutePointSwitch = false;
 addRoutePointToken = '';
@@ -71,6 +71,7 @@ let addGeoControl = function (mapBox, injects) {
                             </div>
                         `
                     );
+                    searchMarkets[index].addTo(map);
                 });
             });
 
@@ -210,19 +211,23 @@ setUserMarket = function (pointList) {
         marker.setLatLng([lat, lon]);
         lat = parseFloat(lat);
         lon = parseFloat(lon);
-        marker.bindPopup(userMarketPopup(point["text"], point["place_name"], lat, lon), popupOption);
-        userMarkers.push(marker);
-        userMarketIndex += 1;
         if (point["point_type"] === 'agoda_hotel') {
             hotelIDs.push(point["point_id"]);
             marker.setIcon(addIcon(L.mapbox, 'building'));
-            let nameMarker = L.marker([lat, lon], {icon: textIcon(`${point["text"]} ¥???`), point_id: point["point_id"], point_type: "agoda_hotel"});
+            let nameMarker = L.marker([lat, lon], {icon: textIcon(`${point["text"]} ¥???`), point_id: point["point_id"], point_type: "agoda_hotel", point_token: point["point_token"]});
             nameMarker.addTo(map);
             userNameMarker.push(nameMarker);
-            searchHotelPrice(marker, checkInTime, checkOutTime);
+            searchHotelPrice(marker, checkInTime, checkOutTime, true);
+            marker.bindPopup(userMarketPopup(point["text"], point["place_name"], lat, lon), hotelPopupOption);
+        } else {
+            marker.bindPopup(userMarketPopup(point["text"], point["place_name"], lat, lon), popupOption);
         }
+        userMarkers.push(marker);
+        userMarketIndex += 1;
     }
-    mGetHotelInfo(hotelIDs);
+    if (hotelIDs.length > 0) {
+        mGetHotelInfo(hotelIDs);
+    }
 };
 
 userMarketPopup = function(text, place_name, lat, lon) {
@@ -250,6 +255,14 @@ let mapMouseControl = function(mapBox) {
         // 地图拖动事件
         map.on('dragstart', function (e) {
             // closeSearchResult();
+        });
+        // 地图拖动结束事件
+        map.on('dragend', function (e) {
+            // console.log(e.target._lastCenter, e.target._zoom)
+        });
+        // 地图缩放结束事件
+        map.on('zoomend', function (e) {
+            // console.log(e.target._lastCenter, e.target._zoom)
         });
         // 气泡点击事件
         map.on('popupopen', function(e) {
