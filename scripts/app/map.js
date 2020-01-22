@@ -50,6 +50,7 @@ let getMap = function(id) {
 
 emptySearch = function(e) {
     emptySearchResult(e);
+    emptyHotel(e);
     emptyFood(e);
     emptyMapPoint(e);
 };
