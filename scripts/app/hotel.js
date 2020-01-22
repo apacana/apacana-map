@@ -35,6 +35,7 @@ Date.prototype.format = function (fmt) {
     return fmt;
 };
 
+// 搜索附近的酒店
 searchNearHotel = function (e) {
     console.log(e.latlng);
     let nowTime = new Date();
@@ -101,6 +102,13 @@ mGetHotelInfo = function (hotelID) {
 allowHotel = function (hotel) {
     for (let search of hotelMarker) {
         if (search["options"]["point_id"] === hotel["hotelId"]) {
+            return false;
+        }
+    }
+    for (let search of userMarkers) {
+        let point_id = Number(search["options"]["point_id"]);
+        if (point_id === hotel["hotelId"] &&
+            search["options"]["point_type"] === "agoda_hotel") {
             return false;
         }
     }
@@ -474,7 +482,7 @@ setAgodaHotelBooking = function(hotel) {
 showHotelInfo = function (marker) {
     let hotelInfo = hotelInfos.get(marker["options"]["point_id"]);
     pane = packHotelInfo(marker["options"]["hotel"], hotelInfo);
-    document.getElementById('featurelist-pane-hotel').innerHTML = pane;
+    document.getElementById('featurelist-pane-info').innerHTML = pane;
     laydate.render({
         elem: '#check-data'
         ,min: 0

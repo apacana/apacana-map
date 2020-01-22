@@ -219,6 +219,9 @@ setUserMarket = function (pointList) {
             userNameMarker.push(nameMarker);
             searchHotelPrice(marker, checkInTime, checkOutTime, true);
             marker.bindPopup(userMarketPopup(point["text"], point["place_name"], lat, lon), hotelPopupOption);
+        } else if (point["point_type"] === 'yelp_food') {
+            marker.setIcon(addIcon(L.mapbox, 'restaurant'));
+            marker.bindPopup(userMarketPopup(point["text"], point["place_name"], lat, lon), foodPopupOption);
         } else {
             marker.bindPopup(userMarketPopup(point["text"], point["place_name"], lat, lon), popupOption);
         }
@@ -250,7 +253,7 @@ let mapMouseControl = function(mapBox) {
         // 单击事件
         map.on('click', function (e) {
             closeSearchResult();
-            document.getElementById('featurelist-pane-hotel').innerHTML = '';
+            document.getElementById('featurelist-pane-info').innerHTML = '';
         });
         // 地图拖动事件
         map.on('dragstart', function (e) {
@@ -269,11 +272,13 @@ let mapMouseControl = function(mapBox) {
             let marker = e.popup._source;
             if (marker["options"]["point_type"] === 'agoda_hotel') {
                 showHotelInfo(marker);
+            } else if (marker["options"]["point_type"] === 'yelp_food') {
+                showFoodInfo(marker);
             }
         });
         // 气泡关闭事件
         map.on('popupclose', function(e) {
-            document.getElementById('featurelist-pane-hotel').innerHTML = '';
+            document.getElementById('featurelist-pane-info').innerHTML = '';
         });
     }
 };

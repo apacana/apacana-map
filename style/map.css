@@ -665,3 +665,8 @@ time, mark, audio, video {
 
 .hotel-label {
 }
+
+.section-info-text {
+    color: rgba(0, 0, 0, 0.87);
+    text-align: left;
+}

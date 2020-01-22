@@ -24,6 +24,9 @@ define(function () {
         getHotel: "/api/hotel/agoda/get/",
         hotelBooking: "/api/hotel/agoda/booking/",
 
+        searchFood: "/api/food/yelp/search/",
+        getFoodInfo: "/api/food/yelp/",
+
         mapBoxDirectionsDomain: "https://api.mapbox.com/directions/v5/",
         mapBoxGeocodingDomain: "https://api.mapbox.com/geocoding/v5/",
     };

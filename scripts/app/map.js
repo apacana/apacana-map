@@ -9,13 +9,19 @@ let getMap = function(id) {
         contextmenuWidth: 140,
         contextmenuItems: [{
             text: '清空搜索结果',
-            callback: emptySearchResult
+            callback: emptySearch
         }, '-', {
             text: '查询附近的酒店',
             callback: searchNearHotel
         }, {
             text: '清空酒店搜索结果',
             callback: emptyHotel
+        }, '-', {
+            text: '查询附近的餐厅',
+            callback: searchNearFood
+        }, {
+            text: '清空餐厅搜索结果',
+            callback: emptyFood
         }, '-', {
             text: '地图采点',
             callback: setMapPoint
@@ -42,12 +48,19 @@ let getMap = function(id) {
     return map;
 };
 
+emptySearch = function(e) {
+    emptySearchResult(e);
+    emptyFood(e);
+    emptyMapPoint(e);
+};
+
 define(function (require) {
     require("leaflet-provider");
     require("leaflet-contextmenu");
     require("./hotel");
     require("./search_result");
     require("./map_point");
+    require("./food");
 
     return {
         getMap: getMap

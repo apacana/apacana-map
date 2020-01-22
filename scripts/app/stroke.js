@@ -176,6 +176,8 @@ createPointHtml = function (point, route_token = "", index = 0) {
                                                 <div class="point-logo-svg" style="background-position:center; background-size:contain;" iconcode="1899-0288D1">`;
     if (point["point_type"] === 'agoda_hotel') {
         pane += `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="21" height="21" style="fill: #0052CC"><path fill="none" d="M0 0h24v24H0z"/><path d="M22 21H2v-2h1V4a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v5h2v10h1v2zm-5-2h2v-8h-6v8h2v-6h2v6zm0-10V5H5v14h6V9h6zM7 11h2v2H7v-2zm0 4h2v2H7v-2zm0-8h2v2H7V7z" fill="#0052CC"/></svg>`;
+    } else if (point["point_type"] === 'yelp_food') {
+        pane += `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="21" height="21" style="fill: #0052CC"><path fill="none" d="M0 0h24v24H0z"/><path d="M21 2v20h-2v-7h-4V8a6 6 0 0 1 6-6zm-2 2.53C18.17 5 17 6.17 17 8v5h2V4.53zM9 13.9V22H7v-8.1A5.002 5.002 0 0 1 3 9V3h2v7h2V3h2v7h2V3h2v6a5.002 5.002 0 0 1-4 4.9z" fill="#0052CC"/></svg>`;
     } else {
         pane += `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="21" height="21" style="fill: #0052CC"><g>
                                                             <path fill="none" d="M0 0h24v24H0z"/>
@@ -492,6 +494,7 @@ getNewDirection = function (index, start_lon, start_lat, end_lon, end_lat, route
                 direction = JSON.stringify(data.routes[0]);
                 let routePoint = routePointMap.get(route_token);
                 routePoint[index]["direction"] = direction;
+                routePoint[index]["direction_type"] = profile;
                 refreshRouteInfoList(route_token);
             }
             removePointRequest(route_token, index, direction, profile);
@@ -985,7 +988,16 @@ removeStrokePointMark = function (point_token) {
                 if (mapPointMarker[j]["options"]["point_id"] === userMarkers[i]["options"]["point_id"] &&
                     mapPointMarker[j]["options"]["point_type"] === userMarkers[i]["options"]["point_type"]) {
                     mapPointMarker[j].removeFrom(map);
-                    // hotelMarker.splice(j, 1);
+                    // mapPointMarker.splice(j, 1);
+                    break
+                }
+            }
+            // 剔除foodMarker中项目
+            for (let j = 0; j < foodMarker.length; j++) {
+                if (foodMarker[j]["options"]["point_id"] === userMarkers[i]["options"]["point_id"] &&
+                    foodMarker[j]["options"]["point_type"] === userMarkers[i]["options"]["point_type"]) {
+                    foodMarker[j].removeFrom(map);
+                    // foodMarker.splice(j, 1);
                     break
                 }
             }
